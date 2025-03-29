@@ -1,0 +1,92 @@
+/* Sidebar container */
+.sidebar-container {
+  width: 250px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #242c44;
+  overflow-x: hidden;
+}
+
+/* Sidebar */
+.siderbar {
+  height: 100%;
+  background-color: #242c44;
+}
+
+/* Chỉnh lại phần logo */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 30px 5px 20px;
+  background-color: #2e3547;
+}
+
+/* Chữ Dashboard */
+.dashboard-text {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Logo */
+.logo-image {
+  width: 20px;
+  height: auto;
+}
+
+/* Sidebar items */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  margin-left: 5px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+  font-weight: bold;
+}
+.sidebar-item.active {
+  color: #63b2f8;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+  font-weight: bold;
+}
+
+/* Icon */
+.sidebar-icon {
+  margin-right: 10px;
+  color: white;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Icon active */
+.sidebar-icon.active {
+  color: #63b2f8;
+  transform: scale(1.2);
+}
+
+.sidebar-item:hover .sidebar-icon {
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-item .MuiListItemIcon-root {
+  color: white !important;
+}
+
+/* Icon khi active */
+.sidebar-item.active .MuiListItemIcon-root {
+  color: #63b2f8 !important;
+}
+
+/* Icon khi hover */
+.sidebar-item:hover .MuiListItemIcon-root {
+  color: rgba(255, 255, 255, 0.1);
+}

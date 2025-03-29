@@ -1,0 +1,76 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0px 20px 0px;
+  gap: 40px;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Vùng chứa các thẻ (Card) */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.card {
+  width: 200px;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card.green {
+  background-color: #aef8ae;
+}
+
+.card.yellow {
+  background-color: #fce9b1;
+}
+
+.card.red {
+  background-color: #f6acac;
+}
+
+.card.purple {
+  background-color: #f1b3fc;
+}
+
+/* Khu vực chọn tháng, năm */
+.date-picker-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.date-picker-container .MuiFormControl-root {
+  min-width: 150px;
+}
+
+/* Biểu đồ (nếu có) */
+.chart-container {
+  display: flex;
+
+  flex-direction: row;
+  gap: 40px;
+}
+
+/* Container biểu đồ demo (nếu có) */
+.bar-chart-container,
+.area-chart-container,
+.composed-chart-container {
+  flex: 1;
+  height: 400px;
+  background-color: #f9f9f9;
+  border-radius: 15px;
+  padding-bottom: 50px;
+  padding: 20px 20px 60px; /* padding-bottom để tránh che trục X */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

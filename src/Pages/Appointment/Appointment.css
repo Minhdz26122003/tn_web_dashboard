@@ -1,0 +1,96 @@
+/* Định dạng bảng */
+.book-table-container {
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+
+/* Thanh công cụ trên (Tab + Date Search) */
+.book-topbar {
+  margin-left: -170px;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* Tabs*/
+.book-tab-container {
+  flex: content;
+}
+
+.tabstatus {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+  overflow: visible;
+}
+
+/* Từng tab */
+.tabitem {
+  font-weight: bold;
+  font-size: 12px !important;
+  text-transform: none;
+  min-width: max-content;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Thêm transition */
+}
+
+/* Hover*/
+.tabitem:hover {
+  background-color: #5596ff;
+  color: #ffffff !important;
+}
+/* Khi tab được chọn */
+.tabitem.Mui-selected {
+  background-color: #0066ff !important;
+  color: #ffffff !important;
+}
+/* Ô tìm kiếm ngày */
+.book-search-container {
+  display: flex;
+
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.book-search-start,
+.book-search-end {
+  font-size: 12px !important;
+  background-color: #ffffff;
+  width: 200px;
+}
+
+/* Bảng dữ liệu */
+.book-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.book-table th,
+.book-table td {
+  border: 0.1px solid #e0e0e0;
+  padding: 12px;
+  text-align: left;
+}
+
+.head-book th {
+  background-color: #0066ff;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.book-table-actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+/* Dialog */
+.dialog-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+}
