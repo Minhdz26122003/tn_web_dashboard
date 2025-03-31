@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+import ApiService from "../../services/ApiCaller";
+import ServiceModel from "../../Model/Service/ServiceModel";
 const ServiceController = (url) => {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState({
@@ -13,7 +14,7 @@ const ServiceController = (url) => {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    limit: 5,
+    limit: 4,
   });
   const [openEdit, setOpenEdit] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
@@ -22,8 +23,7 @@ const ServiceController = (url) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [message, setMessage] = useState("");
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+
   useEffect(() => {
     fetchServices();
   }, []);
@@ -33,18 +33,18 @@ const ServiceController = (url) => {
     limit = pagination.limit
   ) => {
     try {
-      const response = await axios.get(
+      const response = await ApiService.get(
         `${url}apihm/Admin/Service/get_service.php`,
         {
           params: { page, limit },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       const data = response.data;
       if (data && Array.isArray(data.data)) {
-        setServices(data.data);
+        const service_data = data.data.map(
+          (ser) => new ServiceModel({ ...ser })
+        );
+        setServices(service_data);
         setPagination({
           currentPage: data.currentPage,
           totalPages: data.totalPages,
@@ -83,32 +83,35 @@ const ServiceController = (url) => {
   const searchServices = async (service_name, priceRange) => {
     try {
       const [minPrice, maxPrice] = priceRange;
-      const response = await axios.get(
+      const response = await ApiService.get(
         `${url}apihm/Admin/Service/search_service.php`,
         {
           params: { service_name, minPrice, maxPrice },
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
-
-      setServices(response.data.services || []);
+      const service_data = (response.data.services || []).map(
+        (ser) => new ServiceModel({ ...ser })
+      );
+      setServices(service_data);
     } catch (error) {
       console.error("Lỗi khi tìm kiếm dịch vụ", error);
     }
   };
 
   useEffect(() => {
-    if (searchTerm || priceRange) {
-      searchServices(searchTerm, priceRange);
-    } else {
-      fetchServices();
-    }
+    const fetchData = async () => {
+      if (searchTerm || priceRange) {
+        await searchServices(searchTerm, priceRange);
+      } else {
+        await fetchServices();
+      }
+    };
+    fetchData();
   }, [searchTerm, priceRange]);
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
+    setServices([]);
     fetchServices(1, pagination.limit);
   };
 
@@ -116,20 +119,19 @@ const ServiceController = (url) => {
     fetchServices(value, pagination.limit);
   };
 
+  const encodeBase64 = (obj) => {
+    return btoa(encodeURIComponent(JSON.stringify(obj)));
+  };
+
   const handleAddSubmit = async (newService) => {
     if (!checkData(selectedService)) return;
     const payload = { ...newService };
-    const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const encodedData = encodeBase64(payload);
     try {
-      const response = await axios.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Service/add_service.php`,
         {
           data: encodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
 
@@ -151,17 +153,12 @@ const ServiceController = (url) => {
   const handleEditSubmit = async () => {
     if (!checkData(selectedService)) return;
     const payload = { ...selectedService };
-    const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const encodedData = encodeBase64(payload);
     try {
-      const response = await axios.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Service/edit_service.php`,
         {
           data: encodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
       if (response.data.success) {
@@ -182,13 +179,10 @@ const ServiceController = (url) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa dịch vụ này không?")) return;
 
     try {
-      const response = await axios.delete(
+      const response = await ApiService.delete(
         `${url}apihm/Admin/Service/delete_service.php`,
         {
           data: { service_id: id },
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
       if (response.data.success) {
@@ -203,7 +197,10 @@ const ServiceController = (url) => {
       console.error("Lỗi khi xóa:", error);
     }
   };
-  const handleAddClick = () => setOpenAdd(true);
+  const handleAddClick = () => {
+    resetSelectedService();
+    setOpenAdd(true);
+  };
   const handleAddClose = () => setOpenAdd(false);
 
   const handleEdit = (service) => {
@@ -215,13 +212,14 @@ const ServiceController = (url) => {
     setOpenEdit(false);
     resetSelectedService();
   };
-
   const formatPrice = (giatri) => {
-    return giatri
-      ? giatri.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " ₫"
-      : "0 ₫";
+    if (!giatri) return "0";
+    const numericValue =
+      typeof giatri === "string"
+        ? parseInt(giatri.replace(/\D/g, ""), 10)
+        : giatri;
+    return numericValue.toLocaleString("vi-VN");
   };
-
   const toggleExpand = (id) => {
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
   };

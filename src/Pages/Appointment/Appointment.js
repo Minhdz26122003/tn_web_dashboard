@@ -39,24 +39,27 @@ const Appointment = () => {
   const {
     appointments,
     isModalVisible,
-    reason,
-    pagination,
-    selectedAppointmentId,
-    value,
     startDate,
-    endDate,
-    setValue,
-    message,
-    setOpenSnackbar,
+    reason,
     openSnackbar,
-    handleChange,
-    setReason,
+    value,
+    selectedAppointmentId,
+    message,
+    pagination,
+    endDate,
+    handleConfirm,
+    openCancelModal,
+    closeCancelModal,
     setIsModalVisible,
-    setEndDate,
-    setStartDate,
-    handlePageChange,
-    btnStatus,
+    setOpenSnackbar,
+    setReason,
+    handleChange,
     setSelectedAppointmentId,
+    setValue,
+    handlePageChange,
+    setStartDate,
+    setEndDate,
+    btnStatus,
     convertTrangThai,
     fetchAppointments,
     searchAppointments,
@@ -145,82 +148,90 @@ const Appointment = () => {
 
           <TableBody>
             {appointments.length > 0 ? (
-              appointments.map((appointment) => (
-                <TableRow key={appointment.idlichhen}>
-                  <TableCell>{appointment.idlichhen}</TableCell>
-                  <TableCell>{appointment.username}</TableCell>
-                  <TableCell>{appointment.idxe}</TableCell>
-                  <TableCell>{appointment.tentrungtam}</TableCell>
-                  <TableCell>{appointment.tendichvu}</TableCell>
-                  <TableCell>
-                    {new Date(appointment.ngayhen).toLocaleDateString("en-GB", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
-                  </TableCell>
-
-                  <TableCell>{appointment.thoigianhen}</TableCell>
-                  <TableCell>
-                    {convertTrangThai(appointment.trangthai)}
-                  </TableCell>
-
-                  {value === 4 && (
+              appointments.map((data) => {
+                const appointment = new AppointmentModel({ ...data });
+                return (
+                  <TableRow key={appointment.idlichhen}>
+                    <TableCell>{appointment.idlichhen}</TableCell>
+                    <TableCell>{appointment.username}</TableCell>
+                    <TableCell>{appointment.idxe}</TableCell>
+                    <TableCell>{appointment.tentrungtam}</TableCell>
+                    <TableCell>{appointment.tendichvu}</TableCell>
                     <TableCell>
-                      {appointment.lydohuy || "Chưa có lý do"}
-                    </TableCell>
-                  )}
-                  <TableCell className="book-table-actions">
-                    {confirm && (
-                      <IconButton
-                        color="success"
-                        onClick={() =>
-                          handleConfirm(
-                            btnStatus(appointment.trangthai).action,
-                            appointment.idlichhen
-                          )
+                      {new Date(appointment.ngayhen).toLocaleDateString(
+                        "en-GB",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
                         }
-                        disabled={!btnStatus(value).confirm}
-                      >
-                        <CheckIcon />
-                      </IconButton>
+                      )}
+                    </TableCell>
+
+                    <TableCell>{appointment.thoigianhen}</TableCell>
+                    <TableCell>
+                      {convertTrangThai(appointment.trangthai)}
+                    </TableCell>
+
+                    {value === 4 && (
+                      <TableCell>
+                        {appointment.lydohuy || "Chưa có lý do"}
+                      </TableCell>
                     )}
-                    {cancel && (
-                      <IconButton
-                        color="warning"
-                        onClick={() => openCancelModal(appointment.idlichhen)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    )}
-                    {/* Modal nhập lý do hủy */}
-                    <Dialog open={isModalVisible} onClose={closeCancelModal}>
-                      <DialogTitle>Nhập lý do hủy lịch</DialogTitle>
-                      <DialogContent>
-                        <TextField
-                          label="Lý do"
-                          multiline
-                          rows={4}
-                          fullWidth
-                          value={reason}
-                          onChange={(e) => setReason(e.target.value)}
-                        />
-                      </DialogContent>
-                      <DialogActions>
-                        <Button onClick={closeCancelModal} color="secondary">
-                          Đóng
-                        </Button>
-                        <Button
-                          onClick={() => Huylich(selectedAppointmentId, reason)}
-                          color="primary"
+                    <TableCell className="book-table-actions">
+                      {confirm && (
+                        <IconButton
+                          color="success"
+                          onClick={() =>
+                            handleConfirm(
+                              btnStatus(appointment.trangthai).action,
+                              appointment.idlichhen
+                            )
+                          }
+                          disabled={!btnStatus(value).confirm}
                         >
-                          Hủy lịch
-                        </Button>
-                      </DialogActions>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              ))
+                          <CheckIcon />
+                        </IconButton>
+                      )}
+                      {cancel && (
+                        <IconButton
+                          color="warning"
+                          onClick={() => openCancelModal(appointment.idlichhen)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                      {/* Modal nhập lý do hủy */}
+                      <Dialog open={isModalVisible} onClose={closeCancelModal}>
+                        <DialogTitle>Nhập lý do hủy lịch</DialogTitle>
+                        <DialogContent>
+                          <TextField
+                            label="Lý do"
+                            multiline
+                            rows={4}
+                            fullWidth
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                          />
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={closeCancelModal} color="secondary">
+                            Đóng
+                          </Button>
+                          <Button
+                            onClick={() =>
+                              Huylich(selectedAppointmentId, reason)
+                            }
+                            color="primary"
+                          >
+                            Hủy lịch
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={8} align="center">

@@ -28,7 +28,7 @@ import "./centers.css";
 import url from "../../Global/ipconfixad";
 import Pagination from "@mui/material/Pagination";
 import CenterController from "../../Controller/Center/CenterController";
-
+import CenterModel from "../../Model/Center/CenterModel";
 const Centers = () => {
   const {
     centers,
@@ -90,54 +90,60 @@ const Centers = () => {
           {/* Tiêu đề bảng*/}
           <TableHead className="head-center">
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Tên trung tâm</TableCell>
-              <TableCell>Địa chỉ</TableCell>
-              <TableCell>Số điện thoại</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Hình ảnh</TableCell>
-              <TableCell>Tọa độ X</TableCell>
-              <TableCell>Tọa độ Y</TableCell>
-
-              <TableCell>Hành động</TableCell>
+              {[
+                "ID",
+                "Tên trung tâm",
+                "Địa chỉ",
+                "Số điện thoại",
+                "Email",
+                "Hình ảnh",
+                "Tọa độ X",
+                "Tọa độ Y",
+                "Hành động",
+              ].map((header, index) => (
+                <TableCell key={index}>{header}</TableCell>
+              ))}
             </TableRow>
           </TableHead>
 
           <TableBody>
             {centers && centers.length > 0 ? (
-              centers.map((center) => (
-                <TableRow key={center.gara_id}>
-                  <TableCell>{center.gara_id}</TableCell>
-                  <TableCell>{center.gara_name}</TableCell>
-                  <TableCell>{center.gara_address}</TableCell>
-                  <TableCell>{center.phone}</TableCell>
-                  <TableCell>{center.email}</TableCell>
-                  <TableCell>
-                    <img
-                      src={center.gara_img}
-                      alt={center.gara_name}
-                      style={{ width: "100px", height: "auto" }}
-                    />
-                  </TableCell>
-                  <TableCell>{center.x_location}</TableCell>
-                  <TableCell>{center.y_location}</TableCell>
+              centers.map((data) => {
+                const center = new CenterModel({ ...data });
 
-                  <TableCell className="center-table-actions">
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleEdit(center)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDelete(center.gara_id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
+                return (
+                  <TableRow key={center.gara_id}>
+                    <TableCell>{center.gara_id}</TableCell>
+                    <TableCell>{center.gara_name}</TableCell>
+                    <TableCell>{center.gara_address}</TableCell>
+                    <TableCell>{center.phone}</TableCell>
+                    <TableCell>{center.email}</TableCell>
+                    <TableCell>
+                      <img
+                        src={center.gara_img}
+                        alt={center.gara_name}
+                        style={{ width: "100px", height: "auto" }}
+                      />
+                    </TableCell>
+                    <TableCell>{center.x_location}</TableCell>
+                    <TableCell>{center.y_location}</TableCell>
+                    <TableCell className="center-table-actions">
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(center)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDelete(center.gara_id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={8} align="center">
@@ -171,6 +177,7 @@ const Centers = () => {
           {message}
         </Alert>
       </Snackbar>
+
       {/* Dialog sửa*/}
       <Dialog open={openEdit} onClose={handleEditClose} fullWidth maxWidth="md">
         <DialogTitle>Sửa trung tâm</DialogTitle>

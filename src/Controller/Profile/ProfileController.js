@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Snackbar, Alert } from "@mui/material";
+import ApiService from "../../services/ApiCaller";
 const ProfileController = (user, url) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -73,24 +74,20 @@ const ProfileController = (user, url) => {
   };
   const handleEditClose = () => setOpenEdit(false);
 
+  const encodeBase64 = (obj) => {
+    return btoa(encodeURIComponent(JSON.stringify(obj)));
+  };
+
   const handleEditSubmit = async () => {
     try {
-      const token =
-        localStorage.getItem("token") || sessionStorage.getItem("token");
-
       const payload = {
         uid: user.uid,
         ...selectedAccount,
       };
-      const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
-      const response = await axios.post(
+      const encodedData = encodeBase64(payload);
+      const response = await ApiService.post(
         `${url}apihm/Admin/Profile/edit_profile.php`,
-        { data: encodedData },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { data: encodedData }
       );
 
       const data = response.data;
@@ -139,18 +136,13 @@ const ProfileController = (user, url) => {
       currentPassword,
       newPassword,
     };
-    const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const encodedData = encodeBase64(payload);
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
         `${url}apihm/Admin/Account/change_pass.php`,
         {
           data: encodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 

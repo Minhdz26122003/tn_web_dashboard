@@ -32,6 +32,7 @@ import Pagination from "@mui/material/Pagination";
 import { Snackbar, Alert } from "@mui/material";
 import "./service.css"; // Import style riêng
 import url from "../../Global/ipconfixad";
+import ServiceModel from "../../Model/Service/ServiceModel";
 import ServiceController from "../../Controller/Service/ServiceController";
 const Service = () => {
   const {
@@ -111,78 +112,85 @@ const Service = () => {
           {/* Tiêu đề bảng*/}
           <TableHead className="head-service">
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Tên Dịch vụ</TableCell>
-              <TableCell>Mô tả</TableCell>
-              <TableCell>Giá tiền</TableCell>
-              <TableCell>Hình ảnh</TableCell>
-              <TableCell>Thời gian thực hiện</TableCell>
-
-              <TableCell>Hành động</TableCell>
+              {[
+                "ID",
+                "Tên dịch vụ",
+                "Mô tả",
+                "Giá tiền",
+                "Hình ảnh",
+                "Thời gian thực hiện",
+                "Hành động",
+              ].map((header, index) => (
+                <TableCell key={index}>{header}</TableCell>
+              ))}
             </TableRow>
           </TableHead>
 
           <TableBody>
             {services && services.length > 0 ? (
-              services.map((service) => (
-                <TableRow key={service.service_id}>
-                  <TableCell>{service.service_id}</TableCell>
-                  <TableCell>{service.service_name}</TableCell>{" "}
-                  <TableCell>
-                    {expandedRows[service.service_id] ? (
-                      <>
-                        {service.description || "Không có mô tả"}{" "}
-                        <Button
-                          color="primary"
-                          size="small"
-                          onClick={() => toggleExpand(service.service_id)}
-                        >
-                          Thu gọn
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        {service.description && service.description.length > 100
-                          ? `${service.description.slice(0, 100)}...`
-                          : service.description || "Không có mô tả"}
-                        {service.description &&
-                          service.description.length > 100 && (
-                            <Button
-                              color="primary"
-                              size="small"
-                              onClick={() => toggleExpand(service.service_id)}
-                            >
-                              Xem thêm
-                            </Button>
-                          )}
-                      </>
-                    )}
-                  </TableCell>
-                  <TableCell>{formatPrice(service.price)}</TableCell>
-                  <TableCell>
-                    <img
-                      src={service.service_img}
-                      alt={service.service_name}
-                      style={{ width: "100px", height: "auto" }}
-                    />
-                  </TableCell>
-                  <TableCell>{service.time}</TableCell>
-                  <TableCell>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleEdit(service)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDelete(service.service_id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
+              services.map((data) => {
+                const service = new ServiceModel({ ...data });
+                return (
+                  <TableRow key={service.service_id}>
+                    <TableCell>{service.service_id}</TableCell>
+                    <TableCell>{service.service_name}</TableCell>{" "}
+                    <TableCell>
+                      {expandedRows[service.service_id] ? (
+                        <>
+                          {service.description || "Không có mô tả"}{" "}
+                          <Button
+                            color="primary"
+                            size="small"
+                            onClick={() => toggleExpand(service.service_id)}
+                          >
+                            Thu gọn
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {service.description &&
+                          service.description.length > 100
+                            ? `${service.description.slice(0, 100)}...`
+                            : service.description || "Không có mô tả"}
+                          {service.description &&
+                            service.description.length > 100 && (
+                              <Button
+                                color="primary"
+                                size="small"
+                                onClick={() => toggleExpand(service.service_id)}
+                              >
+                                Xem thêm
+                              </Button>
+                            )}
+                        </>
+                      )}
+                    </TableCell>
+                    <TableCell>{formatPrice(service.price)}</TableCell>
+                    <TableCell>
+                      <img
+                        src={service.service_img}
+                        alt={service.service_name}
+                        style={{ width: "100px", height: "auto" }}
+                      />
+                    </TableCell>
+                    <TableCell>{service.time}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(service)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDelete(service.service_id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={8} align="center">
@@ -332,6 +340,7 @@ const Service = () => {
             label="Giá tiền"
             fullWidth
             margin="normal"
+            value={formatPrice(selectedService.price)}
             onChange={(e) =>
               setSelectedService({
                 ...selectedService,

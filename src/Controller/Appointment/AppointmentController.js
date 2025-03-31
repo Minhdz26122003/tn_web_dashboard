@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import ApiService from "../../services/ApiCaller";
+import AppointmentModel from "../../Model/Appointment/AppointmentModel";
 
 const AppointmentController = (url) => {
   const [appointments, setAppointments] = useState([]);
@@ -23,15 +25,18 @@ const AppointmentController = (url) => {
     limit = pagination.limit
   ) => {
     try {
-      const response = await axios.get(
-        `${url}apihm/Admin/Appointment/get_book.php`,
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Appointment/get_appoint.php`,
         {
           params: { page, limit },
         }
       );
       const data = response.data;
       if (data && Array.isArray(data.data)) {
-        setAppointments(data.data);
+        const appoint_data = data.data.map(
+          (app) => new AppointmentModel({ ...app })
+        );
+        setAppointments(appoint_data);
         setPagination({
           currentPage: data.currentPage,
           totalPages: data.totalPages,
@@ -52,11 +57,14 @@ const AppointmentController = (url) => {
         console.error("Ngày bắt đầu và kết thúc không hợp lệ.");
         return;
       }
-      const response = await axios.get(
-        `${url}myapi/Lichhen/tkLichhen.php?start_date=${startDate}&end_date=${endDate}`
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Appointment/search_appoint.php?start_date=${startDate}&end_date=${endDate}`
       );
       if (response.data.success) {
-        setAppointments(response.data.appointments);
+        const appoint_data = (response.data.appointments || []).map(
+          (app) => new AppointmentModel({ ...app })
+        );
+        setAppointments(appoint_data);
       } else {
         setAppointments([]);
       }
@@ -106,26 +114,25 @@ const AppointmentController = (url) => {
   };
 
   // Hủy lịch hẹn
-  const cancelAppointment = async (idlichhen, lyDo) => {
+  const cancelAppointment = async (appointment_id, lyDo) => {
     try {
-      const response = await axios.post(`${url}myapi/Lichhen/huylichhen.php`, {
-        idlichhen,
-        lydohuy: lyDo,
-      });
+      const response = await ApiService.post(
+        `${url}apihm/Admin/Appointment/cancel_appoint.php`,
+        {
+          appointment_id,
+          lydohuy: lyDo,
+        }
+      );
 
       if (response.data.success) {
         setMessage("Lịch hẹn đã được hủy!");
         setOpenSnackbar(true);
 
         fetchAppointments();
-        setIsModalVisible(false);
+        closeCancelModal();
       } else {
         setMessage("Lỗi: " + response.data.message);
         setOpenSnackbar(true);
-        console.log(
-          "Lỗi",
-          response.data.message || "Hủy lịch không thành công."
-        );
       }
     } catch (error) {
       console.error(error);
@@ -136,7 +143,9 @@ const AppointmentController = (url) => {
   // Xác nhận lịch hẹn
   const confirmAppointment = async (id) => {
     try {
-      await axios.post(`${url}myapi/Lichhen/xacnhanLh.php`, { idlichhen: id });
+      await ApiService.post(`${url}apihm/Admin/Appointment/search_acc.php`, {
+        appointment_id: id,
+      });
       fetchAppointments();
     } catch (error) {
       console.error("Lỗi xác nhận lịch hẹn:", error);
@@ -146,9 +155,12 @@ const AppointmentController = (url) => {
   // Hoàn thành lịch hẹn
   const completeAppointment = async (id) => {
     try {
-      await axios.post(`${url}myapi/Lichhen/hoanthanhLh.php`, {
-        idlichhen: id,
-      });
+      await ApiService.post(
+        `${url}apihm/Admin/Appointment/complete_appoint.php`,
+        {
+          appointment_id: id,
+        }
+      );
       fetchAppointments();
     } catch (error) {
       console.error("Lỗi hoàn thành lịch hẹn:", error);
@@ -158,38 +170,95 @@ const AppointmentController = (url) => {
   // Thanh toán lịch hẹn
   const payAppointment = async (id) => {
     try {
-      await axios.post(`${url}myapi/Lichhen/thanhtoanLh.php`, {
-        idlichhen: id,
-      });
+      await axios.ApiService(
+        `${url}apihm/Admin/Appointment/paymented_appoint.php`,
+        {
+          appointment_id: id,
+        }
+      );
       fetchAppointments();
     } catch (error) {
       console.error("Lỗi thanh toán lịch hẹn:", error);
     }
   };
+
+  const handleConfirm = (action, id) => {
+    if (!id) {
+      console.error("Thiếu id");
+      return;
+    }
+
+    let message;
+    switch (action) {
+      case "confirm":
+        message = "Bạn có chắc chắn muốn xác nhận lịch hẹn này?";
+        break;
+      case "complete":
+        message = "Bạn có chắc chắn muốn hoàn thành lịch hẹn này?";
+        break;
+      case "payment":
+        message = "Bạn có chắc chắn muốn thanh toán lịch hẹn này?";
+        break;
+      default:
+        message = "Bạn có chắc chắn muốn thực hiện hành động này?";
+    }
+
+    const confirmAction = window.confirm(message);
+    if (!confirmAction) {
+      console.log("Hủy hành động");
+      return;
+    }
+
+    switch (action) {
+      case "confirm":
+        confirmAppointment(id);
+        break;
+      case "complete":
+        completeAppointment(id);
+        break;
+      case "payment":
+        payAppointment(id);
+        break;
+      default:
+        console.warn("Hành động không hợp lệ:", action);
+        break;
+    }
+  };
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  const closeCancelModal = () => {
+    setIsModalVisible(false);
+  };
 
+  const openCancelModal = (appointment_id) => {
+    setSelectedAppointmentId(appointment_id);
+    setReason("");
+    setIsModalVisible(true);
+  };
   return {
     appointments,
     isModalVisible,
-    setIsModalVisible,
+    startDate,
     reason,
-    setOpenSnackbar,
     openSnackbar,
+    value,
+    selectedAppointmentId,
     message,
+    pagination,
+    endDate,
+    handleConfirm,
+    openCancelModal,
+    closeCancelModal,
+    setIsModalVisible,
+    setOpenSnackbar,
     setReason,
     handleChange,
-    selectedAppointmentId,
     setSelectedAppointmentId,
-    value,
     setValue,
     handlePageChange,
-    startDate,
     setStartDate,
-    endDate,
     setEndDate,
-    pagination,
     btnStatus,
     convertTrangThai,
     fetchAppointments,

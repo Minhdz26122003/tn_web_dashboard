@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import ApiService from "../../services/ApiCaller";
 
 const TempController = (url) => {
   const [selectedServiceCen, setSelectedServiceCen] = useState({
@@ -20,8 +21,7 @@ const TempController = (url) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [message, setMessage] = useState("");
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+
   useEffect(() => {
     fetchServiceCen();
     fetchServices();
@@ -34,13 +34,8 @@ const TempController = (url) => {
 
   const fetchCenters = async () => {
     try {
-      const response = await axios.get(
-        `${url}apihm/Admin/Central_service/get_center.php`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Central_service/get_center.php`
       );
       setCenters(response.data);
     } catch (error) {
@@ -54,13 +49,10 @@ const TempController = (url) => {
       return;
     }
     try {
-      const response = await axios.get(
+      const response = await ApiService.get(
         `${url}apihm/Admin/Central_service/get_service_by_center.php`,
         {
           params: { gara_id: Id },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       console.log("Dữ liệu dịch vụ từ API:", response.data); // Kiểm tra dữ liệu
@@ -74,13 +66,10 @@ const TempController = (url) => {
     limit = pagination.limit
   ) => {
     try {
-      const response = await axios.get(
+      const response = await ApiService.get(
         `${url}apihm/Admin/Central_service/get_central_service.php`,
         {
           params: { page, limit },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       const data = response.data;
@@ -128,19 +117,6 @@ const TempController = (url) => {
   //   }
   // };
 
-  // useEffect(() => {
-  //   if (searchTerm || priceRange) {
-  //     searchServices(searchTerm, priceRange);
-  //   } else {
-  //     fetchServices();
-  //   }
-  // }, [searchTerm, priceRange]);
-
-  // const handleSearch = (event) => {
-  //   setSearchTerm(event.target.value);
-  //   fetchServices(1, pagination.limit);
-  // };
-
   const handlePageChange = (event, value) => {
     fetchServiceCen(value, pagination.limit);
   };
@@ -150,15 +126,10 @@ const TempController = (url) => {
     const payload = { ...newSercen };
     const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
     try {
-      const response = await axios.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Central_service/add_central_service.php`,
         {
           data: encodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
@@ -200,15 +171,11 @@ const TempController = (url) => {
 
   const handleDelete = async (uid) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa dịch vụ này không?")) return;
-
     try {
-      const response = await axios.delete(
+      const response = await ApiService.delete(
         `${url}apihm/Admin/Central_service/delete_central_service.php`,
         {
           data: { id: uid },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       if (response.data.success) {
@@ -223,6 +190,7 @@ const TempController = (url) => {
       console.error("Lỗi khi xóa:", error);
     }
   };
+
   const handleAddClick = () => setOpenAdd(true);
   const handleAddClose = () => {
     resetSelectedSerCen();
@@ -238,6 +206,7 @@ const TempController = (url) => {
     setOpenEdit(false);
     resetSelectedSerCen();
   };
+
   return {
     services,
     centers,
@@ -258,11 +227,9 @@ const TempController = (url) => {
     handleAddSubmit,
     handleAddClick,
     handleAddClose,
-
     handleEdit,
     handleEditClose,
     handleDelete,
-
     setOpenEdit,
     setOpenAdd,
     setSearchTerm,

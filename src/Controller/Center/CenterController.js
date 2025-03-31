@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Snackbar, Alert } from "@mui/material";
+import ApiService from "../../services/ApiCaller";
+import CenterModel from "../../Model/Center/CenterModel";
 const CenterController = (url) => {
   const [centers, setCenters] = useState([]);
   const [selectedCenter, setSelectedCenter] = useState({
@@ -35,25 +37,23 @@ const CenterController = (url) => {
     limit = pagination.limit
   ) => {
     try {
-      const response = await axios.get(
+      const response = await ApiService.get(
         `${url}apihm/Admin/Center/get_center.php`,
         {
           params: { page, limit },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       const data = response.data;
       if (data && Array.isArray(data.data)) {
-        setCenters(data.data);
+        const center_data = data.data.map((cen) => new CenterModel({ ...cen }));
+        setCenters(center_data);
         setPagination({
           currentPage: data.currentPage,
           totalPages: data.totalPages,
           limit,
         });
       } else {
-        setServices([]);
+        setCenters([]);
       }
     } catch (error) {
       console.error("Lỗi khi tải gara :", error);
@@ -87,17 +87,13 @@ const CenterController = (url) => {
   const searchCenters = async (searchParams) => {
     try {
       const query = new URLSearchParams(searchParams).toString();
-      const response = await axios.get(
-        `${url}apihm/Admin/Center/tktrungtam.php?${query}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
-        }
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Center/search_center.php?${query}`
       );
-      const centers = response.data.centers;
-      console.log("API Response:", centers);
-      setCenters(centers);
+      const center_data = (response.data.centers || []).map(
+        (cen) => new CenterModel({ ...cen })
+      );
+      setCenters(center_data);
     } catch (error) {
       console.error("Lỗi khi tìm kiếm trung tâm:", error);
     }
@@ -105,15 +101,18 @@ const CenterController = (url) => {
 
   useEffect(() => {
     const { gara_name, gara_address } = searchTerm;
-    if (gara_name || gara_address) {
-      // console.log("Searching with:", searchTerm);
-      searchCenters(searchTerm);
-    } else {
-      fetchCenter();
-    }
+    const fetchData = async () => {
+      if (gara_name || gara_address) {
+        // console.log("Searching with:", searchTerm);
+        await searchCenters(searchTerm);
+      } else {
+        await fetchCenter();
+      }
+    };
+    fetchData();
   }, [searchTerm]);
 
-  const handleSearch = (event, key, value) => {
+  const handleSearch = (key, value, event) => {
     setSearchTerm((prev) => ({ ...prev, [key]: value }));
     fetchCenter(1, pagination.limit);
   };
@@ -127,15 +126,10 @@ const CenterController = (url) => {
     const payload = { ...newCenter };
     const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
     try {
-      const response = await axios.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Center/add_center.php`,
         {
           data: encodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
 
@@ -158,15 +152,10 @@ const CenterController = (url) => {
     const payload = { ...selectedCenter };
     const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
     try {
-      const response = await axios.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Center/edit_center.php`,
         {
           data: encodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
       if (response.data.success) {
