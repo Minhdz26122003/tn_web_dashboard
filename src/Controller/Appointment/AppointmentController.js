@@ -13,10 +13,24 @@ const AppointmentController = (url) => {
   const [endDate, setEndDate] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [message, setMessage] = useState("");
+  const [totalAppointment, setTotalAppointment] = useState(0);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     limit: 5,
+  });
+  const [statusCounts, setStatusCounts] = useState({
+    unconfirmed: 0,
+    in_progress: 0,
+    completed: 0,
+    paid: 0,
+    canceled: 0,
+  });
+
+  const filteredAppointments = appointments.filter((appointment) => {
+    const matchStatus =
+      value !== "" ? appointment.status === Number(value) : true;
+    return matchStatus;
   });
 
   // Hàm lấy danh sách lịch hẹn
@@ -33,9 +47,12 @@ const AppointmentController = (url) => {
       );
       const data = response.data;
       if (data && Array.isArray(data.data)) {
+        const { statusCounts, totalAppointment } = data;
+        setStatusCounts(statusCounts);
         const appoint_data = data.data.map(
           (app) => new AppointmentModel({ ...app })
         );
+        setTotalAppointment(totalAppointment);
         setAppointments(appoint_data);
         setPagination({
           currentPage: data.currentPage,
@@ -44,9 +61,11 @@ const AppointmentController = (url) => {
         });
       } else {
         setAppointments([]);
+        setTotalAppointment(0);
       }
     } catch (error) {
       console.error("Lỗi khi tải lịch hẹn:", error);
+      setTotalAppointment(0);
     }
   };
 
@@ -247,6 +266,10 @@ const AppointmentController = (url) => {
     message,
     pagination,
     endDate,
+    filteredAppointments,
+    statusCounts,
+    totalAppointment,
+    setStatusCounts,
     handleConfirm,
     openCancelModal,
     closeCancelModal,

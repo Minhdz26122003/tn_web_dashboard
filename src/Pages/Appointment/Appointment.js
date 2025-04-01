@@ -19,6 +19,7 @@ import {
   MenuItem,
   Tabs,
   Select,
+  Typography,
   Tab,
   Box,
 } from "@mui/material";
@@ -33,6 +34,7 @@ import { Snackbar, Alert } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import "./Appointment.css";
 import AppointmentController from "../../Controller/Appointment/AppointmentController";
+import AppointmentModel from "../../Model/Appointment/AppointmentModel";
 import url from "../../Global/ipconfixad";
 
 const Appointment = () => {
@@ -47,6 +49,10 @@ const Appointment = () => {
     message,
     pagination,
     endDate,
+    filteredAppointments,
+    statusCounts,
+    totalAppointment,
+    setStatusCounts,
     handleConfirm,
     openCancelModal,
     closeCancelModal,
@@ -61,14 +67,9 @@ const Appointment = () => {
     setEndDate,
     btnStatus,
     convertTrangThai,
-    fetchAppointments,
-    searchAppointments,
-    cancelAppointment,
-    confirmAppointment,
-    completeAppointment,
-    payAppointment,
   } = AppointmentController(url);
   const { confirm, cancel } = btnStatus(value);
+
   return (
     <div>
       <Box className="book-topbar">
@@ -88,18 +89,34 @@ const Appointment = () => {
                 backgroundColor: "#ffffff",
               },
               "& .MuiTabs-indicator": {
-                backgroundColor: "#0066ff", // Màu của indicator
+                backgroundColor: "#0066ff",
               },
             }}
           >
-            <Tab className="tabitem" label="Chưa xác nhận" />
-            <Tab className="tabitem" label="Đang thực hiện" />
-            <Tab className="tabitem" label="Hoàn thành" />
-            <Tab className="tabitem" label="Đã thanh toán" />
-            <Tab className="tabitem" label="Đã hủy" />
+            <Tab
+              className="tabitem"
+              label={`Chưa xác nhận (${statusCounts.unconfirmed})`}
+            />
+            <Tab
+              className="tabitem"
+              label={`Đang thực hiện (${statusCounts.in_progress})`}
+            />
+            <Tab
+              className="tabitem"
+              label={`Hoàn thành (${statusCounts.completed})`}
+            />
+            <Tab
+              className="tabitem"
+              label={`Đã thanh toán (${statusCounts.paid})`}
+            />
+            <Tab
+              className="tabitem"
+              label={`Đã hủy (${statusCounts.canceled})`}
+            />
           </Tabs>
         </Box>
       </Box>
+
       {/* Tìm kiếm theo ngày */}
       <Box className="book-search-container">
         <TextField
@@ -127,6 +144,13 @@ const Appointment = () => {
           onChange={(e) => setEndDate(e.target.value)}
         />
       </Box>
+      {/* Hiển thị tổng số lịch hẹn */}
+      <Box sx={{ margin: "10px 0" }}>
+        <Typography component="div" sx={{ fontSize: "15px" }}>
+          Tổng số lịch hẹn:{" "}
+          <span style={{ color: "blue" }}>{totalAppointment}</span>
+        </Typography>
+      </Box>
       {/* Bảng lịch hẹn */}
       <TableContainer component={Paper} className="book-table-container">
         <Table aria-label="appointment table" className="book-table">
@@ -136,7 +160,7 @@ const Appointment = () => {
               <TableCell>Tên người dùng</TableCell>
               <TableCell>Biển số xe</TableCell>
               <TableCell>Tên trung tâm</TableCell>
-              <TableCell>Tên dịch Vụ</TableCell>
+              <TableCell>Tên dịch vụ</TableCell>
               <TableCell>Ngày hẹn</TableCell>
               <TableCell>Thời gian hẹn</TableCell>
               <TableCell>Trạng thái</TableCell>
@@ -147,35 +171,34 @@ const Appointment = () => {
           </TableHead>
 
           <TableBody>
-            {appointments.length > 0 ? (
-              appointments.map((data) => {
+            {filteredAppointments.length > 0 ? (
+              filteredAppointments.map((data) => {
                 const appointment = new AppointmentModel({ ...data });
                 return (
-                  <TableRow key={appointment.idlichhen}>
-                    <TableCell>{appointment.idlichhen}</TableCell>
+                  <TableRow key={appointment.appointment_id}>
+                    <TableCell>{appointment.appointment_id}</TableCell>
                     <TableCell>{appointment.username}</TableCell>
-                    <TableCell>{appointment.idxe}</TableCell>
-                    <TableCell>{appointment.tentrungtam}</TableCell>
-                    <TableCell>{appointment.tendichvu}</TableCell>
+                    <TableCell>{appointment.license_plate}</TableCell>
+                    <TableCell>{appointment.gara_name}</TableCell>
+                    <TableCell>{appointment.service_name}</TableCell>
                     <TableCell>
-                      {new Date(appointment.ngayhen).toLocaleDateString(
-                        "en-GB",
-                        {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        }
-                      )}
+                      {new Date(
+                        appointment.appointment_date
+                      ).toLocaleDateString("en-GB", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })}
                     </TableCell>
 
-                    <TableCell>{appointment.thoigianhen}</TableCell>
+                    <TableCell>{appointment.appointment_time}</TableCell>
                     <TableCell>
-                      {convertTrangThai(appointment.trangthai)}
+                      {convertTrangThai(appointment.status)}
                     </TableCell>
 
                     {value === 4 && (
                       <TableCell>
-                        {appointment.lydohuy || "Chưa có lý do"}
+                        {appointment.reason || "Chưa có lý do"}
                       </TableCell>
                     )}
                     <TableCell className="book-table-actions">
@@ -184,8 +207,8 @@ const Appointment = () => {
                           color="success"
                           onClick={() =>
                             handleConfirm(
-                              btnStatus(appointment.trangthai).action,
-                              appointment.idlichhen
+                              btnStatus(appointment.reason).action,
+                              appointment.appointment_id
                             )
                           }
                           disabled={!btnStatus(value).confirm}
@@ -196,7 +219,9 @@ const Appointment = () => {
                       {cancel && (
                         <IconButton
                           color="warning"
-                          onClick={() => openCancelModal(appointment.idlichhen)}
+                          onClick={() =>
+                            openCancelModal(appointment.appointment_id)
+                          }
                         >
                           <DeleteIcon />
                         </IconButton>
