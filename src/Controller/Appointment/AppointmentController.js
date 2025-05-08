@@ -21,8 +21,10 @@ const AppointmentController = (url) => {
   });
   const [statusCounts, setStatusCounts] = useState({
     unconfirmed: 0,
-    in_progress: 0,
-    completed: 0,
+    quote_appoint: 0,
+    under_repair: 0,
+    settlement: 0,
+    pay: 0,
     paid: 0,
     canceled: 0,
   });

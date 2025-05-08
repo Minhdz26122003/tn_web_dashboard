@@ -99,11 +99,19 @@ const Appointment = () => {
             />
             <Tab
               className="tabitem"
-              label={`Đang thực hiện (${statusCounts.in_progress})`}
+              label={`Báo giá (${statusCounts.quote_appoint})`}
             />
             <Tab
               className="tabitem"
-              label={`Hoàn thành (${statusCounts.completed})`}
+              label={`Đang sửa (${statusCounts.under_repair})`}
+            />
+            <Tab
+              className="tabitem"
+              label={`Quyết toán (${statusCounts.settlement})`}
+            />
+            <Tab
+              className="tabitem"
+              label={`Thanh toán (${statusCounts.pay})`}
             />
             <Tab
               className="tabitem"
