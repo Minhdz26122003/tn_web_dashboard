@@ -39,6 +39,9 @@ const Centers = () => {
     selectedCenter,
     openSnackbar,
     message,
+    selectedFile,
+    imagePreviewUrl,
+    handleFileChange,
     setOpenSnackbar,
     fetchCenter,
     setMessage,
@@ -65,12 +68,12 @@ const Centers = () => {
       <Box className="center-search-bar">
         <TextField
           className="name-search-bar"
-          label="Tìm kiếm theo tên trung tâm"
+          label="Tìm kiếm theo tên gara"
           variant="outlined"
           size="medium"
           value={searchTerm.gara_name}
           onChange={(e) => handleSearch("gara_name", e.target.value)}
-          placeholder="Nhập tên trung tâm"
+          placeholder="Nhập tên gara"
         />
 
         {/* Ô tìm kiếm theo địa chỉ */}
@@ -92,7 +95,7 @@ const Centers = () => {
             <TableRow>
               {[
                 "ID",
-                "Tên trung tâm",
+                "Tên gara",
                 "Địa chỉ",
                 "Số điện thoại",
                 "Email",
@@ -147,7 +150,7 @@ const Centers = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={8} align="center">
-                  Không có trung tâm nào đươc tìm thấy
+                  Không có gara nào đươc tìm thấy
                 </TableCell>
               </TableRow>
             )}
@@ -180,12 +183,12 @@ const Centers = () => {
 
       {/* Dialog sửa*/}
       <Dialog open={openEdit} onClose={handleEditClose} fullWidth maxWidth="md">
-        <DialogTitle>Sửa trung tâm</DialogTitle>
+        <DialogTitle>Sửa thông tin gara</DialogTitle>
         <DialogContent>
           {selectedCenter && (
             <>
               <TextField
-                label="Tên trung tâm"
+                label="Tên gara"
                 fullWidth
                 margin="normal"
                 value={selectedCenter.gara_name}
@@ -211,6 +214,7 @@ const Centers = () => {
               <TextField
                 label="Số điện thoại"
                 fullWidth
+                type="number"
                 margin="normal"
                 value={selectedCenter.phone}
                 onChange={(e) =>
@@ -223,6 +227,7 @@ const Centers = () => {
               <TextField
                 label="Email"
                 fullWidth
+                type="email"
                 margin="normal"
                 value={selectedCenter.email}
                 onChange={(e) =>
@@ -232,21 +237,75 @@ const Centers = () => {
                   })
                 }
               />
+              {/* Phần chọn ảnh mới */}
+              <Box sx={{ margin: "normal", marginTop: 2 }}>
+                <Typography variant="subtitle1">Hình ảnh gara:</Typography>
+                {/* Input file ẩn đi */}
+                <input
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  id="edit-gara-image-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                />
+                {/* Nút để kích hoạt input file */}
+                <label htmlFor="edit-gara-image-upload">
+                  <Button variant="contained" component="span">
+                    Chọn ảnh từ máy
+                  </Button>
+                </label>
+                {/* Hiển thị tên file đã chọn (nếu có) */}
+                {selectedFile && (
+                  <Typography variant="body2" sx={{ ml: 2, display: "inline" }}>
+                    Đã chọn: {selectedFile.name}
+                  </Typography>
+                )}
+
+                {/* Hiển thị ảnh xem trước (ảnh cũ hoặc ảnh mới) */}
+                {imagePreviewUrl && (
+                  <Box sx={{ mt: 2 }}>
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Ảnh gara xem trước"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: 200,
+                        objectFit: "contain",
+                      }}
+                    />
+                  </Box>
+                )}
+                {/* Nếu không có ảnh nào */}
+                {!imagePreviewUrl &&
+                  !selectedFile &&
+                  selectedCenter &&
+                  !selectedCenter.gara_img && (
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ mt: 1 }}
+                    >
+                      Chưa có ảnh nào cho gara này và chưa chọn ảnh mới.
+                    </Typography>
+                  )}
+              </Box>
+
+              {/* Trường text "Hình ảnh" ban đầu - có thể giữ lại để hiển thị URL (chỉ đọc) hoặc bỏ đi */}
+              {/* Giữ lại để hiển thị URL hiện tại/mới cho Admin tiện theo dõi */}
+
               <TextField
                 label="Hình ảnh"
                 fullWidth
                 margin="normal"
-                value={selectedCenter.gara_img}
-                onChange={(e) =>
-                  setSelectedCenter({
-                    ...selectedCenter,
-                    gara_img: e.target.value,
-                  })
-                }
+                value={selectedCenter.gara_img || ""}
+                InputProps={{
+                  readOnly: true,
+                }}
               />
               <TextField
                 label="Tọa độ X"
                 fullWidth
+                type="number"
                 margin="normal"
                 value={selectedCenter.x_location}
                 onChange={(e) =>
@@ -259,6 +318,7 @@ const Centers = () => {
               <TextField
                 label="Tọa độ Y"
                 fullWidth
+                type="number"
                 margin="normal"
                 value={selectedCenter.y_location}
                 onChange={(e) =>
@@ -293,7 +353,7 @@ const Centers = () => {
         <DialogTitle>Thêm trung tâm</DialogTitle>
         <DialogContent>
           <TextField
-            label="Tên trung tâm"
+            label="Tên gara"
             fullWidth
             margin="normal"
             onChange={(e) =>
@@ -317,6 +377,7 @@ const Centers = () => {
           <TextField
             label="Số điện thoại"
             fullWidth
+            type="number"
             margin="normal"
             onChange={(e) =>
               setSelectedCenter({
@@ -327,6 +388,7 @@ const Centers = () => {
           />
           <TextField
             label="Email"
+            type="email"
             fullWidth
             margin="normal"
             onChange={(e) =>
@@ -336,21 +398,56 @@ const Centers = () => {
               })
             }
           />
-          {/* Thay đổi: Nhập URL hình ảnh */}
-          <TextField
-            label="URL Hình ảnh"
-            fullWidth
-            margin="normal"
-            onChange={(e) =>
-              setSelectedCenter({
-                ...selectedCenter,
-                gara_img: e.target.value, // Nhập URL hình ảnh
-              })
-            }
-          />
+          {/* Phần chọn ảnh mới */}
+          <Box sx={{ margin: "normal", marginTop: 2 }}>
+            <Typography variant="subtitle1">Hình ảnh gara:</Typography>
+            {/* Input file ẩn đi */}
+            <input
+              accept="image/*"
+              style={{ display: "none" }}
+              id="add-gara-image-upload"
+              type="file"
+              onChange={handleFileChange}
+            />
+            {/* Nút để kích hoạt input file */}
+            <label htmlFor="add-gara-image-upload">
+              <Button variant="contained" component="span">
+                Chọn ảnh từ máy
+              </Button>
+            </label>
+            {/* Hiển thị tên file đã chọn (nếu có) */}
+            {selectedFile && (
+              <Typography variant="body2" sx={{ ml: 2, display: "inline" }}>
+                Đã chọn: {selectedFile.name}
+              </Typography>
+            )}
+
+            {/* Hiển thị ảnh xem trước (ảnh cũ hoặc ảnh mới) */}
+            {imagePreviewUrl && (
+              <Box sx={{ mt: 2 }}>
+                <img
+                  src={imagePreviewUrl}
+                  alt="Ảnh gara xem trước"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: 200,
+                    objectFit: "contain",
+                  }}
+                />
+              </Box>
+            )}
+            {/* Hiển thị khi chưa chọn file */}
+            {!selectedFile && (
+              <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                Chưa có ảnh nào được chọn.
+              </Typography>
+            )}
+          </Box>
+
           <TextField
             label="Tọa độ X"
             fullWidth
+            type="number"
             margin="normal"
             onChange={(e) =>
               setSelectedCenter({
@@ -362,6 +459,7 @@ const Centers = () => {
           <TextField
             label="Tọa độ Y"
             fullWidth
+            type="number"
             margin="normal"
             onChange={(e) =>
               setSelectedCenter({

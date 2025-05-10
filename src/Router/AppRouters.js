@@ -10,7 +10,6 @@ import Center from "../Pages/Centers/centers";
 import Appointment from "../Pages/Appointment/Appointment";
 import Profile from "../Pages/Profile/profile";
 import Login from "../Pages//Login/Login";
-import Sercen from "../Pages/Ser-Cen/ServiceCen";
 import Payment from "../Pages/Payment/Payment";
 import Review from "../Pages/Review/Review";
 import Unauthorized from "../Components/unauthorized.js";
@@ -92,15 +91,7 @@ const AppRouter = ({
                 />
               }
             />
-            <Route
-              path="/sercen"
-              element={
-                <PrivateRoute
-                  loggedInUser={loggedInUser}
-                  element={<Sercen />}
-                />
-              }
-            />
+
             <Route
               path="/appointment"
               element={

@@ -30,8 +30,9 @@ const ServiceController = (url) => {
   const [selectedFile, setSelectedFile] = useState(null);
   // State để lưu trữ URL ảnh xem trước
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+
   useEffect(() => {
-    fetchServices();
+    fetchServices(1, pagination.limit);
     fetchTypeServices();
     if (selectedFile) {
       // tệp được chọn, tạo URL
@@ -47,9 +48,7 @@ const ServiceController = (url) => {
       // Nếu không có cả ảnh mới và ảnh cũ
       setImagePreviewUrl(null);
     }
-    return () => {
-      // Cleanup
-    };
+    return () => {};
   }, [selectedService, selectedFile]);
 
   const fetchServices = async (
@@ -107,6 +106,7 @@ const ServiceController = (url) => {
     if (
       !serviceData.service_name ||
       !serviceData.description ||
+      !serviceData.service_img ||
       !serviceData.price ||
       !serviceData.time
     ) {
@@ -118,6 +118,7 @@ const ServiceController = (url) => {
       serviceData.price.toString().replace(/\D/g, ""),
       10
     );
+
     if (isNaN(numericPrice) || numericPrice < 0) {
       setMessage("Giá tiền không hợp lệ!");
       setOpenSnackbar(true);
@@ -158,7 +159,7 @@ const ServiceController = (url) => {
       if (searchTerm || priceRange) {
         await searchServices(searchTerm, priceRange);
       } else {
-        await fetchServices();
+        await fetchServices(1, pagination.limit);
       }
     };
     fetchData();
@@ -202,7 +203,6 @@ const ServiceController = (url) => {
       setOpenSnackbar(true);
       imageUrl = await uploadImageToCloudinary(selectedFile); // Gọi hàm upload
       if (!imageUrl) {
-        // Nếu upload thất bại, hàm upload đã log lỗi
         setMessage("Thêm dịch vụ thất bại do lỗi upload ảnh.");
         setOpenSnackbar(true);
         return;

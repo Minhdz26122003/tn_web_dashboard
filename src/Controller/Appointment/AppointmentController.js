@@ -108,11 +108,13 @@ const AppointmentController = (url) => {
   // Hàm chuyển đổi trạng thái lịch hẹn thành chữ
   const convertTrangThai = (trangThai) => {
     const trangThaiMap = {
-      0: "Chờ xác nhận",
-      1: "Đang thực hiện",
-      2: "Hoàn thành",
-      3: "Đã thanh toán",
-      4: "Đã hủy",
+      0: "Chưa xác nhận",
+      1: "Đang báo giá",
+      2: "Đang sửa",
+      3: "Quyết toán",
+      4: "Thanh toán",
+      5: "Đã thanh toán",
+      6: "Đã hủy",
     };
     return trangThaiMap[trangThai] || "Không xác định";
   };
@@ -123,12 +125,17 @@ const AppointmentController = (url) => {
       case 0:
         return { confirm: true, cancel: true, action: "confirm" };
       case 1:
-        return { confirm: true, cancel: false, action: "complete" };
+        return { confirm: true, cancel: false, action: null };
       case 2:
         return { confirm: true, cancel: false, action: "payment" };
       case 3:
+        return { confirm: true, cancel: false, action: "confirm" };
       case 4:
         return { confirm: false, cancel: false, action: null };
+      case 5:
+        return { confirm: true, cancel: false, action: "confirm" };
+      case 6:
+        return { confirm: true, cancel: false, action: "confirm" };
       default:
         return { confirm: false, cancel: false, action: null };
     }
@@ -164,15 +171,19 @@ const AppointmentController = (url) => {
   // Xác nhận lịch hẹn
   const confirmAppointment = async (id) => {
     try {
-      await ApiService.post(`${url}apihm/Admin/Appointment/search_acc.php`, {
-        appointment_id: id,
-      });
+      await ApiService.post(
+        `${url}apihm/Admin/Appointment/confirm_appoint.php`,
+        {
+          appointment_id: id,
+        }
+      );
       fetchAppointments();
     } catch (error) {
       console.error("Lỗi xác nhận lịch hẹn:", error);
     }
   };
 
+  // Gửi a
   // Hoàn thành lịch hẹn
   const completeAppointment = async (id) => {
     try {

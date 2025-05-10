@@ -36,7 +36,7 @@ const Payment = () => {
     payments,
     selectedPayment,
     searchTerm,
-    openAdd,
+
     endDate,
     startDate,
     pagination,

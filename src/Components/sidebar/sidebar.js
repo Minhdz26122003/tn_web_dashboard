@@ -44,16 +44,10 @@ const Sidebar = ({ onMenuClick, isSidebarOpen, permissions }) => {
       permission: "service",
     },
     {
-      text: "Trung tâm",
+      text: "Gara",
       icon: <MapsHomeWorkIcon />,
       link: "/center",
       permission: "center",
-    },
-    {
-      text: "Dịch vụ -Trung tâm",
-      icon: <FormatAlignCenterIcon />,
-      link: "/sercen",
-      permission: "sercen",
     },
     {
       text: "Lịch hẹn",

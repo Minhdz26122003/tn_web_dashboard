@@ -106,7 +106,7 @@ const AccountController = (url) => {
       if (searchTerm) {
         await searchAccounts(searchTerm);
       } else {
-        await fetchAccounts();
+        await fetchAccounts(1, pagination.limit);
       }
     };
     fetchData();
@@ -131,6 +131,12 @@ const AccountController = (url) => {
       acc.status === undefined
     ) {
       alert("Vui lòng điền đầy đủ thông tin!");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(acc.email)) {
+      setMessage("Định dạng email không hợp lệ!");
+      setOpenSnackbar(true);
       return false;
     }
     return true;

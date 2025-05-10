@@ -317,6 +317,7 @@ const Account = () => {
               <TextField
                 label="Email"
                 fullWidth
+                type="email"
                 margin="normal"
                 value={selectedAccount?.email || ""}
                 onChange={(e) =>
@@ -341,6 +342,7 @@ const Account = () => {
               <TextField
                 label="Số điện thoại"
                 fullWidth
+                type="number"
                 margin="normal"
                 value={selectedAccount?.phonenum || ""}
                 onChange={(e) =>

@@ -271,15 +271,15 @@ const Service = () => {
                 </InputLabel>{" "}
                 {/* InputLabel cần id */}
                 <Select
-                  labelId="select-type-label" // Liên kết với InputLabel
-                  id="select-type" // ID cho Select
-                  label="Loại dịch vụ" // Label cho Select (khi đã chọn)
-                  value={selectedService?.type_id || ""} // Giá trị được chọn
+                  labelId="select-type-label"
+                  id="select-type"
+                  label="Loại dịch vụ"
+                  value={selectedService?.type_id || ""}
                   onChange={(e) => {
                     const newTypeId = e.target.value;
                     setSelectedService({
                       ...selectedService,
-                      type_id: newTypeId, // Cập nhật type_id
+                      type_id: newTypeId,
                     });
                   }}
                 >
@@ -289,8 +289,7 @@ const Service = () => {
                     types.map((type) => (
                       <MenuItem key={type.type_id} value={type.type_id}>
                         {" "}
-                        {/* Sử dụng type_id làm value */}
-                        {type.type_name} {/* Hiển thị tên loại */}
+                        {type.type_name}
                       </MenuItem>
                     ))}
                 </Select>
@@ -409,7 +408,6 @@ const Service = () => {
             label="Tên dịch vụ"
             fullWidth
             margin="normal"
-            // value={selectedService.service_name} // Khi thêm mới, không set value ban đầu
             onChange={(e) =>
               setSelectedService({
                 ...selectedService,

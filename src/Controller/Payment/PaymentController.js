@@ -92,7 +92,6 @@ const PaymentController = (url) => {
     payments,
     selectedPayment,
     searchTerm,
-    openAdd,
     endDate,
     startDate,
     pagination,

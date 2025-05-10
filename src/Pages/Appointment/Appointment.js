@@ -167,14 +167,14 @@ const Appointment = () => {
               <TableCell>ID</TableCell>
               <TableCell>Tên người dùng</TableCell>
               <TableCell>Biển số xe</TableCell>
-              <TableCell>Tên trung tâm</TableCell>
+              <TableCell>Tên gara</TableCell>
               <TableCell>Tên dịch vụ</TableCell>
               <TableCell>Ngày hẹn</TableCell>
               <TableCell>Thời gian hẹn</TableCell>
               <TableCell>Trạng thái</TableCell>
 
-              {value === 4 && <TableCell>Lý do hủy</TableCell>}
-              {value != 4 && value != 3 && <TableCell>Hành động</TableCell>}
+              {value === 6 && <TableCell>Lý do hủy</TableCell>}
+              {value != 6 && value != 5 && <TableCell>Hành động</TableCell>}
             </TableRow>
           </TableHead>
 
@@ -204,7 +204,7 @@ const Appointment = () => {
                       {convertTrangThai(appointment.status)}
                     </TableCell>
 
-                    {value === 4 && (
+                    {value === 6 && (
                       <TableCell>
                         {appointment.reason || "Chưa có lý do"}
                       </TableCell>
@@ -235,7 +235,11 @@ const Appointment = () => {
                         </IconButton>
                       )}
                       {/* Modal nhập lý do hủy */}
-                      <Dialog open={isModalVisible} onClose={closeCancelModal}>
+                      <Dialog
+                        open={isModalVisible}
+                        onClose={closeCancelModal}
+                        fullWidth
+                      >
                         <DialogTitle>Nhập lý do hủy lịch</DialogTitle>
                         <DialogContent>
                           <TextField
