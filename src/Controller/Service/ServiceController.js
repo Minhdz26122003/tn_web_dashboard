@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+import ApiService from "../../services/ApiCaller";
+import ServiceModel from "../../Model/Service/ServiceModel";
+import { uploadImageToCloudinary } from "../../Utils/CloudiaryUp";
 const ServiceController = (url) => {
   const [services, setServices] = useState([]);
+  const [types, setTypes] = useState([]);
   const [selectedService, setSelectedService] = useState({
     service_name: "",
     description: "",
@@ -22,29 +25,50 @@ const ServiceController = (url) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [message, setMessage] = useState("");
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+
+  // State để lưu trữ tệp ảnh mới được chọn
+  const [selectedFile, setSelectedFile] = useState(null);
+  // State để lưu trữ URL ảnh xem trước
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   useEffect(() => {
     fetchServices();
-  }, []);
+    fetchTypeServices();
+    if (selectedFile) {
+      // tệp được chọn, tạo URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else if (selectedService && selectedService.service_img) {
+      // Nếu không có tệp mới nhưng có ảnh cũ, hiển thị ảnh cũ
+      setImagePreviewUrl(selectedService.service_img);
+    } else {
+      // Nếu không có cả ảnh mới và ảnh cũ
+      setImagePreviewUrl(null);
+    }
+    return () => {
+      // Cleanup
+    };
+  }, [selectedService, selectedFile]);
 
   const fetchServices = async (
     page = pagination.currentPage,
     limit = pagination.limit
   ) => {
     try {
-      const response = await axios.get(
+      const response = await ApiService.get(
         `${url}apihm/Admin/Service/get_service.php`,
         {
           params: { page, limit },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       const data = response.data;
       if (data && Array.isArray(data.data)) {
-        setServices(data.data);
+        const service_data = data.data.map(
+          (ser) => new ServiceModel({ ...ser })
+        );
+        setServices(service_data);
         setPagination({
           currentPage: data.currentPage,
           totalPages: data.totalPages,
@@ -57,18 +81,49 @@ const ServiceController = (url) => {
       console.error("Lỗi khi tải dịch vụ:", error);
     }
   };
+  // Trong component Service (service.js)
+  const fetchTypeServices = async () => {
+    try {
+      const response = await ApiService.get(
+        `${url}apihm/Admin/TypeService/get_type.php`
+      );
+      console.log("Dữ liệu loại dịch vụ từ API:", response.data);
 
-  const checkData = (newService) => {
+      if (response.data && Array.isArray(response.data.data)) {
+        setTypes(response.data.data);
+      } else {
+        console.error(
+          "Dữ liệu loại dịch vụ từ API không phải là mảng:",
+          response.data
+        );
+        setTypes([]);
+      }
+    } catch (error) {
+      console.error("Lỗi khi load loại dịch vụ:", error);
+      setTypes([]); // Đảm bảo state là mảng rỗng khi có lỗi
+    }
+  };
+  const checkData = (serviceData) => {
     if (
-      !newService.service_name ||
-      !newService.description ||
-      !newService.price ||
-      !newService.service_img ||
-      !newService.time
+      !serviceData.service_name ||
+      !serviceData.description ||
+      !serviceData.price ||
+      !serviceData.time
     ) {
-      alert("Vui lòng điền đầy đủ thông tin!");
+      setMessage("Vui lòng điền đầy đủ thông tin bắt buộc!");
+      setOpenSnackbar(true);
       return false;
     }
+    const numericPrice = parseInt(
+      serviceData.price.toString().replace(/\D/g, ""),
+      10
+    );
+    if (isNaN(numericPrice) || numericPrice < 0) {
+      setMessage("Giá tiền không hợp lệ!");
+      setOpenSnackbar(true);
+      return false;
+    }
+
     return true;
   };
   const resetSelectedService = () =>
@@ -83,32 +138,35 @@ const ServiceController = (url) => {
   const searchServices = async (service_name, priceRange) => {
     try {
       const [minPrice, maxPrice] = priceRange;
-      const response = await axios.get(
+      const response = await ApiService.get(
         `${url}apihm/Admin/Service/search_service.php`,
         {
           params: { service_name, minPrice, maxPrice },
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
-
-      setServices(response.data.services || []);
+      const service_data = (response.data.services || []).map(
+        (ser) => new ServiceModel({ ...ser })
+      );
+      setServices(service_data);
     } catch (error) {
       console.error("Lỗi khi tìm kiếm dịch vụ", error);
     }
   };
 
   useEffect(() => {
-    if (searchTerm || priceRange) {
-      searchServices(searchTerm, priceRange);
-    } else {
-      fetchServices();
-    }
+    const fetchData = async () => {
+      if (searchTerm || priceRange) {
+        await searchServices(searchTerm, priceRange);
+      } else {
+        await fetchServices();
+      }
+    };
+    fetchData();
   }, [searchTerm, priceRange]);
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
+    setServices([]);
     fetchServices(1, pagination.limit);
   };
 
@@ -116,20 +174,53 @@ const ServiceController = (url) => {
     fetchServices(value, pagination.limit);
   };
 
+  const encodeBase64 = (obj) => {
+    return btoa(encodeURIComponent(JSON.stringify(obj)));
+  };
+
+  //Hàm xử lý chọn tệp ảnh
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+    } else {
+      setSelectedFile(null);
+      if (selectedService && selectedService.service_img) {
+        setImagePreviewUrl(selectedService.service_img);
+      } else {
+        setImagePreviewUrl(null);
+      }
+    }
+  };
+
   const handleAddSubmit = async (newService) => {
     if (!checkData(selectedService)) return;
-    const payload = { ...newService };
-    const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
+
+    let imageUrl = "";
+    if (selectedFile) {
+      setMessage("Đang upload ảnh...");
+      setOpenSnackbar(true);
+      imageUrl = await uploadImageToCloudinary(selectedFile); // Gọi hàm upload
+      if (!imageUrl) {
+        // Nếu upload thất bại, hàm upload đã log lỗi
+        setMessage("Thêm dịch vụ thất bại do lỗi upload ảnh.");
+        setOpenSnackbar(true);
+        return;
+      }
+      setMessage("Upload ảnh hoàn tất. Đang thêm dịch vụ..."); // Cập nhật trạng thái
+      setOpenSnackbar(true);
+    }
+    const payload = {
+      ...newService,
+      service_img: imageUrl || "",
+    };
+
+    const encodedData = encodeBase64(payload);
     try {
-      const response = await axios.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Service/add_service.php`,
         {
           data: encodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
 
@@ -150,18 +241,34 @@ const ServiceController = (url) => {
 
   const handleEditSubmit = async () => {
     if (!checkData(selectedService)) return;
-    const payload = { ...selectedService };
-    const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
+    let imageUrl = selectedService.service_img;
+
+    //Sử dụng hàm upload từ file dùng chung
+    if (selectedFile) {
+      setMessage("Đang upload ảnh mới...");
+      setOpenSnackbar(true);
+      imageUrl = await uploadImageToCloudinary(selectedFile);
+      if (!imageUrl) {
+        // Nếu upload thất bại, hàm upload đã log lỗi
+        setMessage("Sửa dịch vụ thất bại do lỗi upload ảnh.");
+        setOpenSnackbar(true);
+        return;
+      }
+      setMessage("Upload ảnh mới hoàn tất. Đang cập nhật dịch vụ..."); // Cập nhật trạng thái
+      setOpenSnackbar(true);
+    }
+
+    const payload = {
+      ...selectedService,
+      service_img: imageUrl || "",
+    };
+
+    const encodedData = encodeBase64(payload);
     try {
-      const response = await axios.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Service/edit_service.php`,
         {
           data: encodedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
       if (response.data.success) {
@@ -182,13 +289,10 @@ const ServiceController = (url) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa dịch vụ này không?")) return;
 
     try {
-      const response = await axios.delete(
+      const response = await ApiService.delete(
         `${url}apihm/Admin/Service/delete_service.php`,
         {
           data: { service_id: id },
-          headers: {
-            Authorization: `Bearer ${token}`, // Sử dụng token đã lấy
-          },
         }
       );
       if (response.data.success) {
@@ -203,11 +307,15 @@ const ServiceController = (url) => {
       console.error("Lỗi khi xóa:", error);
     }
   };
-  const handleAddClick = () => setOpenAdd(true);
+  const handleAddClick = () => {
+    resetSelectedService();
+    setOpenAdd(true);
+  };
   const handleAddClose = () => setOpenAdd(false);
 
   const handleEdit = (service) => {
     setSelectedService(service);
+    setSelectedFile(null);
     setOpenEdit(true);
   };
 
@@ -215,11 +323,20 @@ const ServiceController = (url) => {
     setOpenEdit(false);
     resetSelectedService();
   };
-
   const formatPrice = (giatri) => {
-    return giatri
-      ? giatri.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " ₫"
-      : "0 ₫";
+    if (!giatri) return "0";
+    const numericValue =
+      typeof giatri === "string"
+        ? parseInt(giatri.replace(/\D/g, ""), 10)
+        : giatri;
+    return numericValue.toLocaleString("vi-VN");
+  };
+  const handlePriceChangeInField = (e) => {
+    const value = e.target.value;
+    setSelectedService({
+      ...selectedService,
+      price: value,
+    });
   };
 
   const toggleExpand = (id) => {
@@ -237,7 +354,14 @@ const ServiceController = (url) => {
     openSnackbar,
     message,
     expandedRows,
+    selectedFile,
+    imagePreviewUrl,
+    types,
+    setTypes,
+    handleFileChange,
     fetchServices,
+    fetchTypeServices,
+    handlePriceChangeInField,
     setOpenSnackbar,
     setMessage,
     handleSearch,

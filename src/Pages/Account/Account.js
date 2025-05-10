@@ -35,6 +35,7 @@ import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { Snackbar, Alert } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import "./Accounts.css";
+import AccountModel from "../../Model/Account/AcountModel";
 import url from "../../Global/ipconfixad";
 const Account = () => {
   const {
@@ -122,52 +123,58 @@ const Account = () => {
           <Table className="account-table">
             <TableHead className="head-account">
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Tên tài khoản</TableCell>
-                <TableCell>Email</TableCell>
-
-                <TableCell>Tên đầy đủ</TableCell>
-                <TableCell>Địa chỉ</TableCell>
-                <TableCell>Ngày sinh</TableCell>
-                <TableCell>Giới tính</TableCell>
-                <TableCell>Số điện thoại</TableCell>
-                <TableCell>Vai trò</TableCell>
-                <TableCell>Hành động</TableCell>
+                {[
+                  "ID",
+                  "Tên tài khoản",
+                  "Email",
+                  "Tên đầy đủ",
+                  "Địa chỉ",
+                  "Ngày sinh",
+                  "Giới tính",
+                  "Số điện thoại",
+                  "Vai trò",
+                  "Hành động",
+                ].map((header, index) => (
+                  <TableCell key={index}>{header}</TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredStatus.length > 0 ? (
-                filteredStatus.map((account) => (
-                  <TableRow key={account.uid}>
-                    <TableCell>{account.uid}</TableCell>
-                    <TableCell>{account.username}</TableCell>
-                    <TableCell>{account.email}</TableCell>
+                filteredStatus.map((data) => {
+                  const account = new AccountModel({ ...data });
 
-                    <TableCell>{account.fullname}</TableCell>
-                    <TableCell>{account.address}</TableCell>
-                    <TableCell>{account.birthday}</TableCell>
-                    <TableCell>{genderMapping[account.gender]}</TableCell>
-                    <TableCell>{account.phonenum}</TableCell>
-                    <TableCell>{roleMapping[account.status]}</TableCell>
-                    <TableCell>
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleDetail(account)}
-                      >
-                        <RemoveRedEyeIcon />
-                      </IconButton>
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleEdit(account)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
+                  return (
+                    <TableRow key={account.uid}>
+                      <TableCell>{account.uid}</TableCell>
+                      <TableCell>{account.username}</TableCell>
+                      <TableCell>{account.email}</TableCell>
+                      <TableCell>{account.fullname}</TableCell>
+                      <TableCell>{account.address}</TableCell>
+                      <TableCell>{account.birthday}</TableCell>
+                      <TableCell>{genderMapping[account.gender]}</TableCell>
+                      <TableCell>{account.phonenum}</TableCell>
+                      <TableCell>{roleMapping[account.status]}</TableCell>
+                      <TableCell>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleDetail(account)}
+                        >
+                          <RemoveRedEyeIcon />
+                        </IconButton>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleEdit(account)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} align="center">
+                  <TableCell colSpan={10} align="center">
                     Không có tài khoản nào được tìm thấy
                   </TableCell>
                 </TableRow>

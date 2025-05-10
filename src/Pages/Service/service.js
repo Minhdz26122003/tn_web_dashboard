@@ -32,6 +32,7 @@ import Pagination from "@mui/material/Pagination";
 import { Snackbar, Alert } from "@mui/material";
 import "./service.css"; // Import style riêng
 import url from "../../Global/ipconfixad";
+import ServiceModel from "../../Model/Service/ServiceModel";
 import ServiceController from "../../Controller/Service/ServiceController";
 const Service = () => {
   const {
@@ -45,6 +46,13 @@ const Service = () => {
     openSnackbar,
     message,
     expandedRows,
+    selectedFile,
+    imagePreviewUrl,
+    types,
+    setTypes,
+    fetchTypeServices,
+    handleFileChange,
+    handlePriceChangeInField,
     fetchServices,
     setOpenSnackbar,
     setMessage,
@@ -111,78 +119,85 @@ const Service = () => {
           {/* Tiêu đề bảng*/}
           <TableHead className="head-service">
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Tên Dịch vụ</TableCell>
-              <TableCell>Mô tả</TableCell>
-              <TableCell>Giá tiền</TableCell>
-              <TableCell>Hình ảnh</TableCell>
-              <TableCell>Thời gian thực hiện</TableCell>
-
-              <TableCell>Hành động</TableCell>
+              {[
+                "ID",
+                "Tên dịch vụ",
+                "Mô tả",
+                "Giá tiền",
+                "Hình ảnh",
+                "Thời gian thực hiện",
+                "Hành động",
+              ].map((header, index) => (
+                <TableCell key={index}>{header}</TableCell>
+              ))}
             </TableRow>
           </TableHead>
 
           <TableBody>
             {services && services.length > 0 ? (
-              services.map((service) => (
-                <TableRow key={service.service_id}>
-                  <TableCell>{service.service_id}</TableCell>
-                  <TableCell>{service.service_name}</TableCell>{" "}
-                  <TableCell>
-                    {expandedRows[service.service_id] ? (
-                      <>
-                        {service.description || "Không có mô tả"}{" "}
-                        <Button
-                          color="primary"
-                          size="small"
-                          onClick={() => toggleExpand(service.service_id)}
-                        >
-                          Thu gọn
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        {service.description && service.description.length > 100
-                          ? `${service.description.slice(0, 100)}...`
-                          : service.description || "Không có mô tả"}
-                        {service.description &&
-                          service.description.length > 100 && (
-                            <Button
-                              color="primary"
-                              size="small"
-                              onClick={() => toggleExpand(service.service_id)}
-                            >
-                              Xem thêm
-                            </Button>
-                          )}
-                      </>
-                    )}
-                  </TableCell>
-                  <TableCell>{formatPrice(service.price)}</TableCell>
-                  <TableCell>
-                    <img
-                      src={service.service_img}
-                      alt={service.service_name}
-                      style={{ width: "100px", height: "auto" }}
-                    />
-                  </TableCell>
-                  <TableCell>{service.time}</TableCell>
-                  <TableCell>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleEdit(service)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleDelete(service.service_id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
+              services.map((data) => {
+                const service = new ServiceModel({ ...data });
+                return (
+                  <TableRow key={service.service_id}>
+                    <TableCell>{service.service_id}</TableCell>
+                    <TableCell>{service.service_name}</TableCell>{" "}
+                    <TableCell>
+                      {expandedRows[service.service_id] ? (
+                        <>
+                          {service.description || "Không có mô tả"}{" "}
+                          <Button
+                            color="primary"
+                            size="small"
+                            onClick={() => toggleExpand(service.service_id)}
+                          >
+                            Thu gọn
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {service.description &&
+                          service.description.length > 100
+                            ? `${service.description.slice(0, 100)}...`
+                            : service.description || "Không có mô tả"}
+                          {service.description &&
+                            service.description.length > 100 && (
+                              <Button
+                                color="primary"
+                                size="small"
+                                onClick={() => toggleExpand(service.service_id)}
+                              >
+                                Xem thêm
+                              </Button>
+                            )}
+                        </>
+                      )}
+                    </TableCell>
+                    <TableCell>{formatPrice(service.price)}</TableCell>
+                    <TableCell>
+                      <img
+                        src={service.service_img}
+                        alt={service.service_name}
+                        style={{ width: "80px", height: "auto" }}
+                      />
+                    </TableCell>
+                    <TableCell>{service.time}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(service)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDelete(service.service_id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={8} align="center">
@@ -247,30 +262,112 @@ const Service = () => {
                   })
                 }
               />
+              <InputLabel>Loại dịch vụ</InputLabel>
+              <FormControl fullWidth margin="normal">
+                {" "}
+                {/* Sử dụng FormControl */}
+                <InputLabel id="select-type-label">
+                  Loại dịch vụ
+                </InputLabel>{" "}
+                {/* InputLabel cần id */}
+                <Select
+                  labelId="select-type-label" // Liên kết với InputLabel
+                  id="select-type" // ID cho Select
+                  label="Loại dịch vụ" // Label cho Select (khi đã chọn)
+                  value={selectedService?.type_id || ""} // Giá trị được chọn
+                  onChange={(e) => {
+                    const newTypeId = e.target.value;
+                    setSelectedService({
+                      ...selectedService,
+                      type_id: newTypeId, // Cập nhật type_id
+                    });
+                  }}
+                >
+                  {/* Render MenuItem từ mảng types */}
+                  {/* Kiểm tra types là mảng trước khi map */}
+                  {Array.isArray(types) &&
+                    types.map((type) => (
+                      <MenuItem key={type.type_id} value={type.type_id}>
+                        {" "}
+                        {/* Sử dụng type_id làm value */}
+                        {type.type_name} {/* Hiển thị tên loại */}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
               <TextField
                 label="Giá tiền"
                 fullWidth
                 margin="normal"
                 value={formatPrice(selectedService.price)}
-                onChange={(e) =>
-                  setSelectedService({
-                    ...selectedService,
-                    price: e.target.value,
-                  })
-                }
+                onChange={handlePriceChangeInField}
               />
+
+              {/* Phần chọn ảnh mới */}
+              <Box sx={{ margin: "normal", marginTop: 2 }}>
+                <Typography variant="subtitle1">Hình ảnh dịch vụ:</Typography>
+                {/* Input file ẩn đi */}
+                <input
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  id="edit-service-image-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                />
+                {/* Nút để kích hoạt input file */}
+                <label htmlFor="edit-service-image-upload">
+                  <Button variant="contained" component="span">
+                    Chọn ảnh từ máy
+                  </Button>
+                </label>
+                {/* Hiển thị tên file đã chọn (nếu có) */}
+                {selectedFile && (
+                  <Typography variant="body2" sx={{ ml: 2, display: "inline" }}>
+                    Đã chọn: {selectedFile.name}
+                  </Typography>
+                )}
+
+                {/* Hiển thị ảnh xem trước (ảnh cũ hoặc ảnh mới) */}
+                {imagePreviewUrl && (
+                  <Box sx={{ mt: 2 }}>
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Ảnh dịch vụ xem trước"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: 200,
+                        objectFit: "contain",
+                      }}
+                    />
+                  </Box>
+                )}
+                {/* Nếu không có ảnh nào */}
+                {!imagePreviewUrl &&
+                  !selectedFile &&
+                  selectedService &&
+                  !selectedService.service_img && (
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ mt: 1 }}
+                    >
+                      Chưa có ảnh nào cho dịch vụ này và chưa chọn ảnh mới.
+                    </Typography>
+                  )}
+              </Box>
+
+              {/* Trường text "Hình ảnh" ban đầu - có thể giữ lại để hiển thị URL (chỉ đọc) hoặc bỏ đi */}
+              {/* Giữ lại để hiển thị URL hiện tại/mới cho Admin tiện theo dõi */}
               <TextField
-                label="Hình ảnh"
+                label="URL Hình ảnh"
                 fullWidth
                 margin="normal"
-                value={selectedService.service_img}
-                onChange={(e) =>
-                  setSelectedService({
-                    ...selectedService,
-                    service_img: e.target.value,
-                  })
-                }
+                value={selectedService.service_img || ""}
+                InputProps={{
+                  readOnly: true,
+                }}
               />
+
               <TextField
                 label="Thời gian thực hiện"
                 fullWidth
@@ -282,6 +379,8 @@ const Service = () => {
                     time: e.target.value,
                   })
                 }
+                placeholder="VD: 01:30:00 (1 giờ 30 phút)"
+                helperText="Nhập thời gian theo định dạng HH:MM:SS"
               />
             </>
           )}
@@ -310,6 +409,7 @@ const Service = () => {
             label="Tên dịch vụ"
             fullWidth
             margin="normal"
+            // value={selectedService.service_name} // Khi thêm mới, không set value ban đầu
             onChange={(e) =>
               setSelectedService({
                 ...selectedService,
@@ -321,6 +421,7 @@ const Service = () => {
             label="Mô tả"
             fullWidth
             margin="normal"
+            // value={selectedService.description}
             onChange={(e) =>
               setSelectedService({
                 ...selectedService,
@@ -328,41 +429,96 @@ const Service = () => {
               })
             }
           />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="add-type-label">Loại dịch vụ</InputLabel>
+            <Select
+              labelId="add-type-label"
+              id="add-type-select"
+              label="Loại dịch vụ"
+              value={selectedService?.type_id || ""}
+              onChange={(e) =>
+                setSelectedService({
+                  ...selectedService,
+                  type_id: e.target.value,
+                })
+              }
+            >
+              {types.map((type) => (
+                <MenuItem key={type.type_id} value={type.type_id}>
+                  {type.type_name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <TextField
             label="Giá tiền"
             fullWidth
             margin="normal"
-            onChange={(e) =>
-              setSelectedService({
-                ...selectedService,
-                price: e.target.value,
-              })
-            }
+            value={formatPrice(selectedService.price)}
+            onChange={handlePriceChangeInField}
           />
-          {/* Thay đổi: Nhập URL hình ảnh */}
+
+          {/* Thêm phần chọn ảnh cho dialog thêm tương tự dialog sửa */}
+          <Box sx={{ margin: "normal", marginTop: 2 }}>
+            <Typography variant="subtitle1">Hình ảnh dịch vụ:</Typography>
+            {/* Input file ẩn đi */}
+            <input
+              accept="image/*"
+              style={{ display: "none" }}
+              id="add-service-image-upload" // ID duy nhất cho dialog thêm
+              type="file"
+              onChange={handleFileChange} // Dùng chung handler chọn file
+            />
+            {/* Nút để kích hoạt input file */}
+            <label htmlFor="add-service-image-upload">
+              <Button variant="contained" component="span">
+                Chọn ảnh từ máy
+              </Button>
+            </label>
+            {/* Hiển thị tên file đã chọn (nếu có) */}
+            {selectedFile && (
+              <Typography variant="body2" sx={{ ml: 2, display: "inline" }}>
+                Đã chọn: {selectedFile.name}
+              </Typography>
+            )}
+
+            {/* Hiển thị ảnh xem trước (chỉ ảnh mới được chọn) */}
+            {/* Đối với dialog thêm, preview chỉ hiển thị ảnh MỚI chọn */}
+            {imagePreviewUrl && (
+              <Box sx={{ mt: 2 }}>
+                <img
+                  src={imagePreviewUrl}
+                  alt="Ảnh dịch vụ xem trước"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: 200,
+                    objectFit: "contain",
+                  }}
+                />
+              </Box>
+            )}
+            {/* Hiển thị khi chưa chọn file */}
+            {!selectedFile && (
+              <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                Chưa có ảnh nào được chọn.
+              </Typography>
+            )}
+          </Box>
+
           <TextField
-            label="URL Hình ảnh"
+            label="Thời gian thực hiện"
             fullWidth
             margin="normal"
-            onChange={(e) =>
-              setSelectedService({
-                ...selectedService,
-                service_img: e.target.value,
-              })
-            }
-          />
-          <TextField
-            label="Thời gian thực hiện (giờ)"
-            type="text"
-            fullWidth
-            margin="normal"
-            value={selectedService.time || "00:00:00"}
+            value={selectedService?.time || ""}
             onChange={(e) =>
               setSelectedService({
                 ...selectedService,
                 time: e.target.value,
               })
             }
+            placeholder="VD: 01:30:00 (1 giờ 30 phút)"
+            helperText="Nhập thời gian theo định dạng HH:MM:SS"
           />
         </DialogContent>
         <DialogActions>
@@ -372,6 +528,7 @@ const Service = () => {
           >
             Trở lại
           </Button>
+          {/* Truyền selectedService vào handleAddSubmit */}
           <Button
             onClick={() => handleAddSubmit(selectedService)}
             style={{ backgroundColor: "#228b22", color: "#fff" }}

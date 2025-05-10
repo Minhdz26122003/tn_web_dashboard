@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ApiService from "../../services/ApiCaller";
 import AccountModel from "../../Model/Account/AcountModel";
@@ -30,8 +30,7 @@ const AccountController = (url) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [message, setMessage] = useState("");
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+
   const roleMapping = {
     0: "Người dùng",
     1: "Quản lý",
@@ -68,7 +67,8 @@ const AccountController = (url) => {
 
       const data = response.data;
       if (data && Array.isArray(data.data)) {
-        setAccounts(data.data);
+        const users = data.data.map((acc) => new AccountModel({ ...acc }));
+        setAccounts(users);
         setPagination({
           currentPage: data.currentPage,
           totalPages: data.totalPages,
@@ -92,9 +92,12 @@ const AccountController = (url) => {
         }
       );
 
-      setAccounts(response.data.accounts || []);
+      const users = (response.data.accounts || []).map(
+        (acc) => new AccountModel({ ...acc })
+      );
+      setAccounts(users);
     } catch (error) {
-      console.error("Error searching accounts:", error);
+      console.error("Lỗi khi tìm kiếm tài khoản:", error);
     }
   };
 
@@ -132,11 +135,13 @@ const AccountController = (url) => {
     }
     return true;
   };
-
+  const encodeBase64 = (obj) => {
+    return btoa(encodeURIComponent(JSON.stringify(obj)));
+  };
   const handleAddSubmit = async (newAccount) => {
     // if (!checkData(selectedAccount)) return;
     const payload = { ...newAccount };
-    const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const encodedData = encodeBase64(payload);
     try {
       const response = await ApiService.post(
         `${url}apihm/Admin/Account/add_acc.php`,
@@ -161,7 +166,7 @@ const AccountController = (url) => {
   const handleEditSubmit = async () => {
     // if (!checkData(selectedAccount)) return;
     const payload = { ...selectedAccount };
-    const encodedData = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const encodedData = encodeBase64(payload);
     try {
       const response = await ApiService.post(
         `${url}apihm/Admin/Account/edit_acc.php`,
@@ -204,6 +209,7 @@ const AccountController = (url) => {
       console.error("Xóa tài khoản không thành công:", error);
     }
   };
+
   const handleDetail = (account) => {
     setSelectedAccount(account);
     setOpenDetail(true);
@@ -237,7 +243,10 @@ const AccountController = (url) => {
     resetSelectedAccount();
   };
 
-  const handleAddClick = () => setOpenAdd(true);
+  const handleAddClick = () => {
+    resetSelectedAccount();
+    setOpenAdd(true);
+  };
   const handleAddClose = () => setOpenAdd(false);
 
   return {

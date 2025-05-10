@@ -28,64 +28,27 @@ import {
 import axios from "axios";
 import "./Payment.css"; // Import style riêng
 import url from "../../Global/ipconfixad";
+import Pagination from "@mui/material/Pagination";
+import PaymentController from "../../Controller/Payment/PaymentController";
+import PaymentModel from "../../Model/Payment/PaymentModel";
 const Payment = () => {
-  const [payments, setPayment] = useState([]);
-  const [selectedPayment, setSelectedPayment] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-
-  const fetchPayments = async () => {
-    try {
-      const response = await axios.get(`${url}myapi/Thanhtoan/gethoadon.php`);
-      const data = response.data;
-      if (Array.isArray(data)) {
-        setPayment(data);
-      } else {
-        console.error("Dữ liệu trả về không phải là mảng:", data);
-        setPayment([]);
-      }
-    } catch (error) {
-      console.error("Error fetching payment:", error);
-    }
-  };
-  useEffect(() => {
-    if (startDate && endDate) {
-      searchPayments(startDate, endDate);
-    } else {
-      fetchPayments();
-    }
-  }, [startDate, endDate]);
-
-  const formatPrice = (giatri) => {
-    if (giatri === undefined || giatri === null) {
-      return "0 ₫";
-    }
-    return giatri.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " ₫";
-  };
-
-  //TÌM KIẾM HÓA ĐƠN
-  const searchPayments = async (startDate, endDate) => {
-    try {
-      if (!startDate || !endDate) {
-        console.error("Ngày bắt đầu và kết thúc không hợp lệ.");
-        return;
-      }
-      const response = await axios.get(
-        `${url}myapi/Thanhtoan/tkhoadon.php?start_date=${startDate}&end_date=${endDate}`
-      );
-      console.log(response.data);
-
-      if (response.data.success) {
-        setPayment(response.data.payments);
-      } else {
-        setPayment([]);
-      }
-    } catch (error) {
-      console.error("Lỗi khi tìm kiếm lịch hẹn:", error);
-    }
-  };
-
+  const {
+    payments,
+    selectedPayment,
+    searchTerm,
+    openAdd,
+    endDate,
+    startDate,
+    pagination,
+    setSelectedPayment,
+    setStartDate,
+    setSearchTerm,
+    setEndDate,
+    handlePageChange,
+    setPagination,
+    formatPrice,
+    setPayment,
+  } = PaymentController(url);
   return (
     <div>
       {/* Thanh tìm kiếm */}
@@ -130,21 +93,24 @@ const Payment = () => {
 
           <TableBody>
             {payments && payments.length > 0 ? (
-              payments.map((payment) => (
-                <TableRow key={payment.idthanhtoan}>
-                  <TableCell>{payment.idthanhtoan}</TableCell>
-                  <TableCell>{payment.idlichhen}</TableCell>
-                  <TableCell>
-                    {new Date(payment.ngaythanhtoan).toLocaleDateString(
-                      "en-GB",
-                      { year: "numeric", month: "2-digit", day: "2-digit" }
-                    )}
-                  </TableCell>
+              payments.map((data) => {
+                const payment = new PaymentModel({ ...data });
+                return (
+                  <TableRow key={payment.idthanhtoan}>
+                    <TableCell>{payment.idthanhtoan}</TableCell>
+                    <TableCell>{payment.idlichhen}</TableCell>
+                    <TableCell>
+                      {new Date(payment.ngaythanhtoan).toLocaleDateString(
+                        "en-GB",
+                        { year: "numeric", month: "2-digit", day: "2-digit" }
+                      )}
+                    </TableCell>
 
-                  <TableCell>{payment.hinhthuc}</TableCell>
-                  <TableCell>{formatPrice(payment.tongtien)}</TableCell>
-                </TableRow>
-              ))
+                    <TableCell>{payment.hinhthuc}</TableCell>
+                    <TableCell>{formatPrice(payment.tongtien)}</TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={8} align="center">
@@ -155,6 +121,19 @@ const Payment = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Box
+        display="flex"
+        justifyContent="end"
+        alignItems="center"
+        marginTop={2}
+      >
+        <Pagination
+          count={pagination.totalPages}
+          page={pagination.currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </Box>
     </div>
   );
 };
