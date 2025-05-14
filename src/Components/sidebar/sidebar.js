@@ -46,8 +46,14 @@ const Sidebar = ({ onMenuClick, isSidebarOpen, permissions }) => {
     {
       text: "Gara",
       icon: <MapsHomeWorkIcon />,
-      link: "/center",
-      permission: "center",
+      link: "/gara",
+      permission: "gara",
+    },
+    {
+      text: "Phụ tùng",
+      icon: <LoyaltyIcon />,
+      link: "/accessory",
+      permission: "accessory",
     },
     {
       text: "Lịch hẹn",

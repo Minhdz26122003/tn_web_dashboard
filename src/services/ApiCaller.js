@@ -1,7 +1,7 @@
 import axios from "axios";
 import url from "../Global/ipconfixad";
 const ApiCaller = axios.create({
-  baseURL: { url },
+  baseURL: url,
   headers: {
     "Content-Type": "application/json",
   },

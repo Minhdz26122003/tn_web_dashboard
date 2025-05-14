@@ -91,7 +91,7 @@ const Account = () => {
             <InputLabel>Vai trò</InputLabel>
             <Select
               sx={{ height: "52px" }}
-              size="medium"
+              size="small"
               value={status}
               onChange={(e) =>
                 setStatus(
@@ -139,7 +139,7 @@ const Account = () => {
                 ))}
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody className="body-account">
               {filteredStatus.length > 0 ? (
                 filteredStatus.map((data) => {
                   const account = new AccountModel({ ...data });

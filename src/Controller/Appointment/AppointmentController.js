@@ -8,7 +8,7 @@ const AppointmentController = (url) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [reason, setReason] = useState("");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(0);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -17,22 +17,33 @@ const AppointmentController = (url) => {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    limit: 5,
+    limit: 10,
   });
   const [statusCounts, setStatusCounts] = useState({
+    all: 0,
     unconfirmed: 0,
     quote_appoint: 0,
+    accepted_quote: 0, // Đã chấp nhận báo giá
     under_repair: 0,
+    completed: 0, // Hoàn thành
     settlement: 0,
     pay: 0,
     paid: 0,
     canceled: 0,
   });
+  const [parts, setParts] = useState([]); // State cho phụ tùng
+  const [newParts, setNewParts] = useState([]); // State cho phụ tùng mới thêm
+  const [isAddPartsModalVisible, setIsAddPartsModalVisible] = useState(false);
+  const [selectedPart, setSelectedPart] = useState(null);
 
   const filteredAppointments = appointments.filter((appointment) => {
-    const matchStatus =
-      value !== "" ? appointment.status === Number(value) : true;
-    return matchStatus;
+    if (value === 0) {
+      // Nếu value là 0 (tab "Tất cả")
+      return true;
+    }
+    //status(chỉ mục tab - 1)
+    const statusToFilter = Number(value) - 1;
+    return appointment.status === statusToFilter;
   });
 
   // Hàm lấy danh sách lịch hẹn
@@ -79,7 +90,7 @@ const AppointmentController = (url) => {
         return;
       }
       const response = await ApiService.get(
-        `${url}apihm/Admin/Appointment/search_appoint.php?start_date=${startDate}&end_date=${endDate}`
+        `<span class="math-inline">\{url\}apihm/Admin/Appointment/search\_appoint\.php?start\_date\=</span>{startDate}&end_date=${endDate}`
       );
       if (response.data.success) {
         const appoint_data = (response.data.appointments || []).map(
@@ -97,6 +108,7 @@ const AppointmentController = (url) => {
   const handlePageChange = (event, value) => {
     fetchAppointments(value, pagination.limit);
   };
+
   useEffect(() => {
     if (startDate && endDate) {
       searchAppointments(startDate, endDate);
@@ -109,12 +121,14 @@ const AppointmentController = (url) => {
   const convertTrangThai = (trangThai) => {
     const trangThaiMap = {
       0: "Chưa xác nhận",
-      1: "Đang báo giá",
-      2: "Đang sửa",
-      3: "Quyết toán",
-      4: "Thanh toán",
-      5: "Đã thanh toán",
-      6: "Đã hủy",
+      1: "Báo giá",
+      2: "Đã chấp nhận báo giá",
+      3: "Đang sửa",
+      4: "Hoàn thành",
+      5: "Quyết toán",
+      6: "Thanh toán",
+      7: "Đã thanh toán",
+      8: "Đã hủy",
     };
     return trangThaiMap[trangThai] || "Không xác định";
   };
@@ -123,19 +137,31 @@ const AppointmentController = (url) => {
   const btnStatus = (trangThai) => {
     switch (trangThai) {
       case 0:
+        return { confirm: false, cancel: false, action: confirm };
+      case 1: // Chưa xác nhận
         return { confirm: true, cancel: true, action: "confirm" };
-      case 1:
-        return { confirm: true, cancel: false, action: null };
-      case 2:
-        return { confirm: true, cancel: false, action: "payment" };
-      case 3:
-        return { confirm: true, cancel: false, action: "confirm" };
-      case 4:
+      case 2: // Đang báo giá
         return { confirm: false, cancel: false, action: null };
-      case 5:
-        return { confirm: true, cancel: false, action: "confirm" };
-      case 6:
-        return { confirm: true, cancel: false, action: "confirm" };
+      case 3: // Đã chấp nhận báo giá
+        return { confirm: true, cancel: false, action: "startRepair" };
+      case 4: // Đang sửa
+        return {
+          confirm: true,
+          cancel: false,
+          action: "completeRepair",
+          addParts: true,
+        };
+      case 5: // Hoàn thành
+        return { confirm: true, cancel: false, action: "settlement" };
+      case 6: // Quyết toán
+        return {
+          confirm: false,
+          cancel: false,
+          action: null,
+          viewSettlement: true,
+        };
+      case 7: // Thanh toán
+        return { confirm: false, cancel: false, action: "paid" };
       default:
         return { confirm: false, cancel: false, action: null };
     }
@@ -171,46 +197,141 @@ const AppointmentController = (url) => {
   // Xác nhận lịch hẹn
   const confirmAppointment = async (id) => {
     try {
-      await ApiService.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Appointment/confirm_appoint.php`,
         {
           appointment_id: id,
         }
       );
-      fetchAppointments();
+      if (response.success) {
+        setMessage("Xác nhận lịch thành công!");
+        setOpenSnackbar(true);
+        fetchAppointments();
+      } else {
+        setMessage("Lỗi: " + response.data.message);
+        setOpenSnackbar(true);
+      }
     } catch (error) {
       console.error("Lỗi xác nhận lịch hẹn:", error);
     }
   };
 
-  // Gửi a
+  // Bắt đầu sửa chữa
+  const startRepair = async (id) => {
+    try {
+      const response = await ApiService.post(
+        `${url}apihm/Admin/Appointment/start_repair.php`,
+        {
+          appointment_id: id,
+        }
+      );
+      if (response.success) {
+        fetchAppointments();
+        setMessage("Đã bắt đầu sửa chữa !");
+        setOpenSnackbar(true);
+      } else {
+        setMessage("Lỗi: " + response.data.message);
+        setOpenSnackbar(true);
+      }
+    } catch (error) {
+      console.error("Lỗi bắt đầu sửa chữa:", error);
+    }
+  };
+
   // Hoàn thành lịch hẹn
   const completeAppointment = async (id) => {
     try {
-      await ApiService.post(
+      const response = await ApiService.post(
         `${url}apihm/Admin/Appointment/complete_appoint.php`,
         {
           appointment_id: id,
         }
       );
-      fetchAppointments();
+      if (response.success) {
+        setMessage("Đã hoàn thành sửa chữa lịch hẹn!");
+        setOpenSnackbar(true);
+        fetchAppointments();
+      } else {
+        setMessage("Lỗi: " + response.data.message);
+        setOpenSnackbar(true);
+      }
     } catch (error) {
       console.error("Lỗi hoàn thành lịch hẹn:", error);
     }
   };
 
-  // Thanh toán lịch hẹn
-  const payAppointment = async (id) => {
+  // Gửi quyết toán
+  const sendSettlement = async (id) => {
     try {
-      await axios.ApiService(
+      const response = await ApiService.post(
+        `${url}apihm/Admin/Appointment/send_settlement.php`,
+        {
+          appointment_id: id,
+        }
+      );
+      if (response.success) {
+        setMessage("Gửi quyết toán thành công!");
+        setOpenSnackbar(true);
+        fetchAppointments();
+      } else {
+        setMessage("Lỗi: " + response.data.message);
+        setOpenSnackbar(true);
+      }
+    } catch (error) {
+      console.error("Lỗi gửi quyết toán:", error);
+    }
+  };
+
+  // Xác nhận thanh toán
+  const confirmPayment = async (id) => {
+    try {
+      const response = await ApiService.post(
         `${url}apihm/Admin/Appointment/paymented_appoint.php`,
         {
           appointment_id: id,
         }
       );
-      fetchAppointments();
+      if (response.success) {
+        fetchAppointments();
+        setMessage("Lịch hẹn đã được thanh toán!");
+        setOpenSnackbar(true);
+      } else {
+        setMessage("Lỗi: " + response.data.message);
+        setOpenSnackbar(true);
+      }
     } catch (error) {
-      console.error("Lỗi thanh toán lịch hẹn:", error);
+      console.error("Lỗi xác nhận thanh toán:", error);
+    }
+  };
+
+  // Thêm phụ tùng vào lịch hẹn
+  const addPartsToAppointment = async (id, parts) => {
+    try {
+      const response = await ApiService.post(
+        `${url}apihm/Admin/AccessPayment/add_access_pay.php`,
+        {
+          appointment_id: id,
+          parts: parts.map((part) => ({
+            id: part.id,
+            quantity: part.quantity,
+          })),
+        }
+      );
+
+      if (response.data.success) {
+        fetchAppointments();
+        setMessage("Đã thêm phụ tùng thành công!");
+        setOpenSnackbar(true);
+      } else {
+        setMessage("Lỗi: " + response.data.message);
+        setOpenSnackbar(true);
+      }
+    } catch (error) {
+      console.error("Lỗi thêm phụ tùng:", error);
+      setMessage("Lỗi kết nối hoặc lỗi server.");
+      setOpenSnackbar(true);
+    } finally {
+      setIsAddPartsModalVisible(false);
     }
   };
 
@@ -220,21 +341,32 @@ const AppointmentController = (url) => {
       return;
     }
 
-    let message;
+    let message = "";
     switch (action) {
       case "confirm":
         message = "Bạn có chắc chắn muốn xác nhận lịch hẹn này?";
         break;
-      case "complete":
-        message = "Bạn có chắc chắn muốn hoàn thành lịch hẹn này?";
+      case "acceptQuote":
+        message = "Bạn có chắc chắn muốn chấp nhận báo giá này?";
         break;
-      case "payment":
-        message = "Bạn có chắc chắn muốn thanh toán lịch hẹn này?";
+      case "startRepair":
+        message = "Bạn có muốn bắt đầu sửa chữa không?";
+        break;
+      case "completeRepair":
+        message = "Xác nhận hoàn tất sửa chữa?";
+        break;
+      case "settlement":
+        message = "Bạn có muốn gửi quyết toán hóa đơn ?";
+        break;
+      case "paid":
+        message = "Xác nhận khách hàng đã thanh toán?";
+        break;
+      case "cancel":
+        message = "Bạn có chắc chắn muốn hủy lịch hẹn này?";
         break;
       default:
         message = "Bạn có chắc chắn muốn thực hiện hành động này?";
     }
-
     const confirmAction = window.confirm(message);
     if (!confirmAction) {
       console.log("Hủy hành động");
@@ -245,17 +377,27 @@ const AppointmentController = (url) => {
       case "confirm":
         confirmAppointment(id);
         break;
+      case "start_repair":
+        startRepair(id);
+        break;
       case "complete":
         completeAppointment(id);
         break;
-      case "payment":
-        payAppointment(id);
+      case "settlement":
+        sendSettlement(id);
+        break;
+      case "send_invoice":
+        sendInvoice(id);
+        break;
+      case "confirm_payment":
+        confirmPayment(id);
         break;
       default:
         console.warn("Hành động không hợp lệ:", action);
         break;
     }
   };
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -268,13 +410,26 @@ const AppointmentController = (url) => {
     setReason("");
     setIsModalVisible(true);
   };
+
+  const openAddPartsModal = (appointment_id) => {
+    setSelectedAppointmentId(appointment_id);
+    setNewParts([]); // Reset danh sách phụ tùng mới
+    setIsAddPartsModalVisible(true);
+  };
+
+  const closeAddPartsModal = () => {
+    setIsAddPartsModalVisible(false);
+  };
+
   return {
     appointments,
     isModalVisible,
     startDate,
+    handleChange,
+    setValue,
+    value,
     reason,
     openSnackbar,
-    value,
     selectedAppointmentId,
     message,
     pagination,
@@ -289,9 +444,6 @@ const AppointmentController = (url) => {
     setIsModalVisible,
     setOpenSnackbar,
     setReason,
-    handleChange,
-    setSelectedAppointmentId,
-    setValue,
     handlePageChange,
     setStartDate,
     setEndDate,
@@ -302,7 +454,12 @@ const AppointmentController = (url) => {
     cancelAppointment,
     confirmAppointment,
     completeAppointment,
-    payAppointment,
+    //payAppointment,
+    addPartsToAppointment,
+    openAddPartsModal,
+    closeAddPartsModal,
+    isAddPartsModalVisible,
+    setSelectedAppointmentId,
   };
 };
 

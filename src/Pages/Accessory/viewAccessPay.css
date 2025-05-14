@@ -1,0 +1,20 @@
+.head-access th {
+  background-color: #1c77ff;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 13px;
+}
+.body-access td {
+  font-size: 12px;
+}
+.access-table {
+  border-collapse: collapse;
+}
+
+.access-table th,
+.access-table td {
+  border: 0.1px solid #e0e0e0;
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+}

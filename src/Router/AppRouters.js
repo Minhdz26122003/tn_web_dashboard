@@ -12,6 +12,7 @@ import Profile from "../Pages/Profile/profile";
 import Login from "../Pages//Login/Login";
 import Payment from "../Pages/Payment/Payment";
 import Review from "../Pages/Review/Review";
+import Accessory from "../Pages/Accessory/Accessory";
 import Unauthorized from "../Components/unauthorized.js";
 
 const PrivateRoute = ({ element, loggedInUser }) => {
@@ -83,7 +84,7 @@ const AppRouter = ({
               }
             />
             <Route
-              path="/center"
+              path="/gara"
               element={
                 <PrivateRoute
                   loggedInUser={loggedInUser}
@@ -116,6 +117,15 @@ const AppRouter = ({
                 <PrivateRoute
                   loggedInUser={loggedInUser}
                   element={<Review />}
+                />
+              }
+            />
+            <Route
+              path="/accessory"
+              element={
+                <PrivateRoute
+                  loggedInUser={loggedInUser}
+                  element={<Accessory />}
                 />
               }
             />

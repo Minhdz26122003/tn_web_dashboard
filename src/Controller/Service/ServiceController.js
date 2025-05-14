@@ -3,6 +3,7 @@ import axios from "axios";
 import ApiService from "../../services/ApiCaller";
 import ServiceModel from "../../Model/Service/ServiceModel";
 import { uploadImageToCloudinary } from "../../Utils/CloudiaryUp";
+
 const ServiceController = (url) => {
   const [services, setServices] = useState([]);
   const [types, setTypes] = useState([]);

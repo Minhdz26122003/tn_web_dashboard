@@ -7,7 +7,10 @@
   background-color: #0066ff;
   color: #ffffff;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;
+}
+.body-account td {
+  font-size: 12px;
 }
 .account-table {
   border-collapse: collapse;

@@ -109,7 +109,7 @@ const Centers = () => {
             </TableRow>
           </TableHead>
 
-          <TableBody>
+          <TableBody className="body-center">
             {centers && centers.length > 0 ? (
               centers.map((data) => {
                 const center = new CenterModel({ ...data });

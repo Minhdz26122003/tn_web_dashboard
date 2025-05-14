@@ -1,18 +1,18 @@
 /* Định dạng bảng */
-.service-table-container {
+.accessory-table-container {
   max-width: 100%;
   margin-bottom: 10px;
 }
-.head-service th {
+.head-accessory th {
   background-color: #0066ff;
   color: #ffffff;
   font-weight: bold;
   font-size: 13px;
 }
-.body-service td {
+.body-accessory td {
   font-size: 12px;
 }
-.service-topbar {
+.accessory-topbar {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -20,10 +20,10 @@
   font-size: 14px;
   margin-bottom: 10px;
 }
-.service-table {
+.accessory-table {
   border-collapse: collapse;
 }
-.service-dropdown {
+.accessory-dropdown {
   border-radius: 5px;
   border: outset rgba(0, 0, 0, 0.1);
   width: 25%;
@@ -32,21 +32,21 @@
   display: flex;
   align-items: center;
 }
-.service-table th,
-.service-table td {
+.accessory-table th,
+.accessory-table td {
   border: 0.1px solid #e0e0e0;
   padding: 12px;
   text-align: left;
 }
 
-.service-table-actions {
+.accessory-table-actions {
   display: flex;
   justify-content: space-around;
 }
-.service-search-container {
+.accessory-search-container {
   width: 30%;
 }
-.service-search-bar {
+.accessory-search-bar {
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -74,7 +74,7 @@
   padding-left: 10px;
   width: 30%;
 }
-.service-search-price {
+.accessory-search-price {
   margin: 15px;
 }
 .select-type-label {

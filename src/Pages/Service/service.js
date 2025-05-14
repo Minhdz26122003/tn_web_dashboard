@@ -133,7 +133,7 @@ const Service = () => {
             </TableRow>
           </TableHead>
 
-          <TableBody>
+          <TableBody className="body-service">
             {services && services.length > 0 ? (
               services.map((data) => {
                 const service = new ServiceModel({ ...data });

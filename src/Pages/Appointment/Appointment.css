@@ -9,7 +9,6 @@
   margin-left: -170px;
   justify-content: flex-start;
   margin-bottom: 10px;
-  font-size: 14px;
 }
 
 /* Tabs*/
@@ -27,9 +26,11 @@
 /* Từng tab */
 .tabitem {
   font-weight: bold;
-  font-size: 12px !important;
+  font-size: 11px !important;
   text-transform: none;
   min-width: max-content;
+  /* min-height: "auto";
+  padding: "10px 7px"; */
   transition: background-color 0.3s ease, color 0.3s ease; /* Thêm transition */
 }
 
@@ -46,7 +47,6 @@
 /* Ô tìm kiếm ngày */
 .book-search-container {
   display: flex;
-
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
@@ -54,7 +54,7 @@
 
 .book-search-start,
 .book-search-end {
-  font-size: 12px !important;
+  font-size: 10px !important;
   background-color: #ffffff;
   width: 200px;
 }
@@ -76,21 +76,12 @@
   background-color: #0066ff;
   color: #ffffff;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;
 }
-
+.body-book td {
+  font-size: 12px;
+}
 .book-table-actions {
   display: flex;
   justify-content: space-around;
-}
-
-/* Dialog */
-.dialog-title {
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
 }
