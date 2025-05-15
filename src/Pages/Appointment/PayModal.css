@@ -1,0 +1,42 @@
+/* accesspay */
+.head-accesspay th {
+  background-color: #1c77ff;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 13px;
+}
+.body-accesspay td {
+  font-size: 12px;
+}
+.accesspay-table {
+  border-collapse: collapse;
+}
+
+.accesspay-table th,
+.accesspay-table td {
+  border: 0.1px solid #e0e0e0;
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+}
+/* service */
+.head-service th {
+  background-color: #1c77ff;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 13px;
+}
+.body-service td {
+  font-size: 12px;
+}
+.service-table {
+  border-collapse: collapse;
+}
+
+.service-table th,
+.service-table td {
+  border: 0.1px solid #e0e0e0;
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+}

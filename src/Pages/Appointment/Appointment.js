@@ -29,12 +29,14 @@ import {
 import { Snackbar, Alert } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import "./Appointment.css";
 import AppointmentController from "../../Controller/Appointment/AppointmentController";
 import AppointmentModel from "../../Model/Appointment/AppointmentModel";
 import url from "../../Global/ipconfixad";
 import AddPartsModal from "./AddPartModal";
 import ViewAccessPayModal from "../Accessory/viewAccessPay";
+import PayModal from "../../Pages/Appointment/PayModal";
 
 const Appointment = () => {
   const {
@@ -51,6 +53,10 @@ const Appointment = () => {
     filteredAppointments,
     statusCounts,
     totalAppointment,
+    fetchSettlement,
+    settlementOpen,
+    setSettlementOpen,
+    currentAppointmentId,
     handleChange,
     setStatusCounts,
     handleConfirm,
@@ -428,8 +434,8 @@ const Appointment = () => {
               <TableCell>Ngày hẹn</TableCell>
               <TableCell>Thời gian hẹn</TableCell>
               <TableCell>Trạng thái</TableCell>
-              {value === 8 && <TableCell>Lý do hủy</TableCell>}
-              {value != 7 && value != 8 && <TableCell>Hành động</TableCell>}
+              {value === 9 && <TableCell>Lý do hủy</TableCell>}
+              {value != 8 && <TableCell>Hành động</TableCell>}
             </TableRow>
           </TableHead>
 
@@ -437,6 +443,16 @@ const Appointment = () => {
             {filteredAppointments.length > 0 ? (
               filteredAppointments.map((data) => {
                 const appointment = new AppointmentModel({ ...data });
+                {
+                  /* console.log(
+                  "Appointment ID:",
+                  appointment.appointment_id,
+                  "Status:",
+                  appointment.status,
+                  "ViewSettlement Flag:",
+                  btnStatus(appointment.status).viewSettlement
+                ); */
+                }
                 return (
                   <TableRow key={appointment.appointment_id}>
                     <TableCell>{appointment.appointment_id}</TableCell>
@@ -464,6 +480,7 @@ const Appointment = () => {
                         {appointment.reason || "Chưa có lý do"}
                       </TableCell>
                     )}
+
                     <TableCell className="book-table-actions">
                       {/* xác nhận */}
                       {confirm && (
@@ -491,9 +508,15 @@ const Appointment = () => {
                       )}
 
                       {/* Xem quyết toán*/}
-                      {btnStatus(Number(value)).viewSettlement && (
-                        <IconButton color="info" onClick={() => {}}>
-                          <VisibilityIcon />
+                      {btnStatus(appointment.status).viewSettlement && (
+                        <IconButton
+                          color="info"
+                          onClick={() =>
+                            fetchSettlement(appointment.appointment_id)
+                          }
+                          title="Xem quyết toán"
+                        >
+                          <RemoveRedEyeIcon />
                         </IconButton>
                       )}
 
@@ -506,13 +529,6 @@ const Appointment = () => {
                           }
                         >
                           <AddIcon />
-                        </IconButton>
-                      )}
-
-                      {/* Xem hóa đơn tổng ở quyết toán*/}
-                      {btnStatus(Number(value)).viewInvoice && (
-                        <IconButton color="info">
-                          <VisibilityIcon />
                         </IconButton>
                       )}
 
@@ -546,6 +562,12 @@ const Appointment = () => {
                         appointmentId={selectedAppointmentForPartsInvoice}
                       />
 
+                      {/* Modal Hóa Đơn Tổng */}
+                      <PayModal
+                        open={settlementOpen}
+                        onClose={() => setSettlementOpen(false)}
+                        appointmentId={currentAppointmentId}
+                      />
                       {/* Modal nhập lý do hủy */}
                       <Dialog
                         open={isModalVisible}

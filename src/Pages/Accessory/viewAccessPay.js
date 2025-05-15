@@ -15,8 +15,11 @@ import {
   IconButton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ApiService from "../../services/ApiCaller";
-import url from "../../Global/ipconfixad";
+
+import {
+  fetchAccessPayments,
+  deleteAccessPayment,
+} from "../../Controller/Accessory/AccessPayController";
 import "./viewAccessPay.css";
 
 const viewAccessPay = ({ open, onClose, appointmentId }) => {
@@ -27,50 +30,26 @@ const viewAccessPay = ({ open, onClose, appointmentId }) => {
 
   useEffect(() => {
     if (open && appointmentId) {
-      fetchItems();
+      setLoading(true);
+      fetchAccessPayments(appointmentId)
+        .then((data) => setItems(data))
+        .finally(() => setLoading(false));
     }
   }, [open, appointmentId]);
-
-  const fetchItems = () => {
-    setLoading(true);
-    ApiService.get(`${url}apihm/Admin/AccessPayment/get_access_pay.php`, {
-      params: { appointment_id: appointmentId },
-    })
-      .then((res) => {
-        if (res.data.success) setItems(res.data.parts);
-        else setItems([]);
-      })
-      .catch(() => setItems([]))
-      .finally(() => setLoading(false));
-  };
 
   const handleDelete = async (accessoryId) => {
     if (!window.confirm("Bạn có chắc muốn xóa phụ tùng này khỏi hoá đơn?"))
       return;
-    try {
-      const response = await ApiService.post(
-        `${url}apihm/Admin/AccessPayment/delete_access_pay.php`,
-        {
-          appointment_id: appointmentId,
-          accessory_id: accessoryId,
-        }
-      );
-      if (response.data.success) {
-        setMessage("Đã xóa thành công phụ tùng khỏi hóa đơn!");
-        setOpenSnackbar(true);
-        setItems((prev) =>
-          prev.filter((it) => it.accessory_id !== accessoryId)
-        );
-      } else {
-        setMessage("Lỗi: " + response.data.message);
-        setOpenSnackbar(true);
-      }
-    } catch (error) {
-      console.error(error);
+    const ok = await deleteAccessPayment(appointmentId, accessoryId);
+    if (ok) {
+      setMessage("Đã xóa thành công phụ tùng khỏi hóa đơn!");
+      setItems((prev) => prev.filter((it) => it.accessory_id !== accessoryId));
+    } else {
+      setMessage("Xóa thất bại, vui lòng thử lại.");
     }
+    setOpenSnackbar(true);
   };
 
-  // Tính tổng tiền
   const total = items.reduce((sum, it) => sum + it.quantity * it.unit_price, 0);
 
   return (

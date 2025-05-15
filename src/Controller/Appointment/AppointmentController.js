@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import ApiService from "../../services/ApiCaller";
 import AppointmentModel from "../../Model/Appointment/AppointmentModel";
+import PayModal from "../../Pages/Appointment/PayModal";
 
 const AppointmentController = (url) => {
   const [appointments, setAppointments] = useState([]);
@@ -31,10 +32,15 @@ const AppointmentController = (url) => {
     paid: 0,
     canceled: 0,
   });
-  const [parts, setParts] = useState([]); // State cho phụ tùng
+  const [settlementOpen, setSettlementOpen] = useState(false);
+  const fetchSettlement = (id) => {
+    setCurrentAppointmentId(id);
+    setSettlementOpen(true);
+  };
+  const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
+
   const [newParts, setNewParts] = useState([]); // State cho phụ tùng mới thêm
   const [isAddPartsModalVisible, setIsAddPartsModalVisible] = useState(false);
-  const [selectedPart, setSelectedPart] = useState(null);
 
   const filteredAppointments = appointments.filter((appointment) => {
     if (value === 0) {
@@ -136,8 +142,8 @@ const AppointmentController = (url) => {
   // Xử lý trạng thái nút hành động
   const btnStatus = (trangThai) => {
     switch (trangThai) {
-      case 0:
-        return { confirm: false, cancel: false, action: confirm };
+      case 0: // Chưa xác nhận
+        return { confirm: false, cancel: false, action: null };
       case 1: // Chưa xác nhận
         return { confirm: true, cancel: true, action: "confirm" };
       case 2: // Đang báo giá
@@ -150,18 +156,23 @@ const AppointmentController = (url) => {
           cancel: false,
           action: "completeRepair",
           addParts: true,
+          viewSettlement: true, // that ra là dang ơ tab hoan thanh
         };
       case 5: // Hoàn thành
-        return { confirm: true, cancel: false, action: "settlement" };
+        return {
+          confirm: true,
+          cancel: false,
+          action: "settlement",
+          viewSettlement: true, // that ra là dang ơ tab quyết toán
+        };
       case 6: // Quyết toán
         return {
           confirm: false,
           cancel: false,
           action: null,
-          viewSettlement: true,
         };
       case 7: // Thanh toán
-        return { confirm: false, cancel: false, action: "paid" };
+        return { confirm: true, cancel: false, action: "paid" };
       default:
         return { confirm: false, cancel: false, action: null };
     }
@@ -203,7 +214,7 @@ const AppointmentController = (url) => {
           appointment_id: id,
         }
       );
-      if (response.success) {
+      if (response.data.success) {
         setMessage("Xác nhận lịch thành công!");
         setOpenSnackbar(true);
         fetchAppointments();
@@ -225,12 +236,12 @@ const AppointmentController = (url) => {
           appointment_id: id,
         }
       );
-      if (response.success) {
+      if (response.data.success) {
         fetchAppointments();
         setMessage("Đã bắt đầu sửa chữa !");
         setOpenSnackbar(true);
       } else {
-        setMessage("Lỗi: " + response.data.message);
+        setMessage("Lỗi: " + response.data.error);
         setOpenSnackbar(true);
       }
     } catch (error) {
@@ -247,7 +258,7 @@ const AppointmentController = (url) => {
           appointment_id: id,
         }
       );
-      if (response.success) {
+      if (response.data.success) {
         setMessage("Đã hoàn thành sửa chữa lịch hẹn!");
         setOpenSnackbar(true);
         fetchAppointments();
@@ -269,7 +280,7 @@ const AppointmentController = (url) => {
           appointment_id: id,
         }
       );
-      if (response.success) {
+      if (response.data.success) {
         setMessage("Gửi quyết toán thành công!");
         setOpenSnackbar(true);
         fetchAppointments();
@@ -285,22 +296,21 @@ const AppointmentController = (url) => {
   // Xác nhận thanh toán
   const confirmPayment = async (id) => {
     try {
-      const response = await ApiService.post(
-        `${url}apihm/Admin/Appointment/paymented_appoint.php`,
-        {
-          appointment_id: id,
-        }
+      const res = await ApiService.post(
+        `${url}apihm/Admin/Payment/paymented_appoint.php`,
+        { appointment_id: id }
       );
-      if (response.success) {
+      if (res.data.success) {
         fetchAppointments();
         setMessage("Lịch hẹn đã được thanh toán!");
         setOpenSnackbar(true);
       } else {
-        setMessage("Lỗi: " + response.data.message);
-        setOpenSnackbar(true);
+        throw new Error(res.data.message);
       }
-    } catch (error) {
-      console.error("Lỗi xác nhận thanh toán:", error);
+    } catch (err) {
+      console.error("Lỗi xác nhận thanh toán:", err);
+      setMessage("Xác nhận thanh toán thất bại!");
+      setOpenSnackbar(true);
     }
   };
 
@@ -377,10 +387,10 @@ const AppointmentController = (url) => {
       case "confirm":
         confirmAppointment(id);
         break;
-      case "start_repair":
+      case "startRepair":
         startRepair(id);
         break;
-      case "complete":
+      case "completeRepair":
         completeAppointment(id);
         break;
       case "settlement":
@@ -413,7 +423,7 @@ const AppointmentController = (url) => {
 
   const openAddPartsModal = (appointment_id) => {
     setSelectedAppointmentId(appointment_id);
-    setNewParts([]); // Reset danh sách phụ tùng mới
+    setNewParts([]);
     setIsAddPartsModalVisible(true);
   };
 
@@ -437,6 +447,12 @@ const AppointmentController = (url) => {
     filteredAppointments,
     statusCounts,
     totalAppointment,
+
+    settlementOpen,
+    setSettlementOpen,
+    fetchSettlement,
+    currentAppointmentId,
+
     setStatusCounts,
     handleConfirm,
     openCancelModal,
