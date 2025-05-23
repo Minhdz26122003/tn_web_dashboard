@@ -33,7 +33,7 @@ const ServiceController = (url) => {
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
   useEffect(() => {
-    fetchServices(1, pagination.limit);
+    fetchServices();
     fetchTypeServices();
     if (selectedFile) {
       // tệp được chọn, tạo URL
@@ -81,7 +81,7 @@ const ServiceController = (url) => {
       console.error("Lỗi khi tải dịch vụ:", error);
     }
   };
-  // Trong component Service (service.js)
+
   const fetchTypeServices = async () => {
     try {
       const response = await ApiService.get(

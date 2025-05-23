@@ -8,6 +8,9 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Box,
+  TextField, // Import TextField cho DatePicker
+  Button, // Import Button
 } from "@mui/material";
 import {
   BarChart,
@@ -16,32 +19,43 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  AreaChart,
   Legend,
+  ResponsiveContainer,
   ComposedChart,
   Area,
-  LabelList,
   Line,
-  LineChart,
-  ResponsiveContainer,
+  LabelList,
+  AreaChart, // Đảm bảo AreaChart đã được import nếu bạn vẫn dùng
 } from "recharts";
 
 import axios from "axios";
-import "./dashboard.css"; // Import style riêng
+import "./dashboard.css";
 import url from "../../Global/ipconfixad";
+import ApiService from "../../services/ApiCaller";
+
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+
+import AppointmentFlow from "./AppointmentFlow";
+import TotalAppointChart from "./TotalAppointChart";
+import RevenueChart from "./RevenueChart";
+import AccessoryRevenueChart from "./AccessoryRevenueChart";
 
 const Dashboard = () => {
   const [month, setMonth] = useState(12);
-  const [data, setData] = useState("");
+  const [year, setYear] = useState(2024);
   const [user, setTotalUsers] = useState(0);
   const [service, setTotalServices] = useState(0);
-  const [center, setTotalCenters] = useState(0);
-  const [appointments, setTotalAppointments] = useState(0);
-  const [year, setYear] = useState(2024);
+  const [appointments, setTotalApps] = useState(0);
+  const [price, setPrice] = useState(0);
   const [datamonth, setDataMonth] = useState([]);
-  const [revenue, setRevenue] = useState([]);
   const [datayear, setDataYear] = useState([]);
-  const [price, setPrice] = useState([]);
+  const [revenue, setRevenue] = useState([]);
+
+  const [appointmentStatusCounts, setAppointmentStatusCounts] = useState(null);
 
   useEffect(() => {
     TkeMonth();
@@ -49,9 +63,9 @@ const Dashboard = () => {
     TkeDthu();
     fetchUser();
     fetchService();
-    fetchCenter();
     fetchAppointment();
     fetchRenvenue();
+    fetchAppointmentStatusCounts();
   }, [month, year]);
 
   const fetchUser = async () => {
@@ -74,21 +88,11 @@ const Dashboard = () => {
       console.error("Error fetching service statistics:", error);
     }
   };
-  const fetchCenter = async () => {
-    try {
-      const response = await axios.get(`${url}myapi/Thongke/tketrungtam.php`);
-      if (response.data.success) {
-        setTotalCenters(response.data.total_centers);
-      }
-    } catch (error) {
-      console.error("Error fetching center statistics:", error);
-    }
-  };
-  const fetchAppointment = async (year) => {
+  const fetchAppointment = async () => {
     try {
       const response = await axios.get(`${url}myapi/Thongke/tkelichhen.php?`);
       if (response.data.success) {
-        setTotalAppointments(response.data.solich);
+        setTotalApps(response.data.solich);
       }
     } catch (error) {
       console.error("Error fetching appointment statistics:", error);
@@ -153,7 +157,7 @@ const Dashboard = () => {
       const response = await axios.get(
         `${url}myapi/Thongke/tkedoanhthu.php?&year=${year}`
       );
-      console.log("API response:", response.data);
+      //console.log("API response:", response.data);
 
       if (
         response.data.success &&
@@ -178,6 +182,26 @@ const Dashboard = () => {
       setRevenue([]);
     }
   };
+
+  const fetchAppointmentStatusCounts = async () => {
+    try {
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Statistical/get_appointment_status_counts.php`
+      );
+      if (response.data.success) {
+        setAppointmentStatusCounts(response.data.data);
+      } else {
+        console.error(
+          "Error fetching appointment status counts:",
+          response.data.message
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching appointment status counts:", error);
+    }
+  };
+
+  // Hàm định dạng tiền tệ
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -189,184 +213,98 @@ const Dashboard = () => {
     <div className="dashboard-container">
       {/* Container for cards */}
       <div className="cards-container">
-        <Card className="card green">
-          <CardContent>
-            <Typography variant="h6" component="div">
-              Tổng người dùng
-            </Typography>
-            <Typography variant="h5">{user}</Typography>
+        {/* Card: All Earnings */}
+        <Card className="card earning">
+          <CardContent className="card-content-top">
+            <Box className="text-section">
+              <Typography variant="h5" className="value">
+                {formatCurrency(price)}
+              </Typography>
+              <Typography variant="body2" className="title">
+                All Earnings
+              </Typography>
+            </Box>
+            <AttachMoneyIcon className="icon-wrapper" />
           </CardContent>
+          <div className="card-footer">
+            <Typography variant="body2">10% changes on profit</Typography>
+            <TrendingUpIcon className="chart-icon" /> {/* Biểu tượng biểu đồ */}
+          </div>
         </Card>
 
-        <Card className="card blue">
-          <CardContent>
-            <Typography variant="h6" component="div">
-              Doanh thu
-            </Typography>
-            <Typography variant="h5">{formatCurrency(price)}</Typography>
+        {/* Card: Task */}
+        <Card className="card task">
+          <CardContent className="card-content-top">
+            <Box className="text-section">
+              <Typography variant="h5" className="value">
+                {appointments}
+              </Typography>
+              <Typography variant="body2" className="title">
+                Task
+              </Typography>
+            </Box>
+            <CalendarTodayIcon className="icon-wrapper" />
           </CardContent>
+          <div className="card-footer">
+            <Typography variant="body2">28% task performance</Typography>
+            <TrendingUpIcon className="chart-icon" />
+          </div>
         </Card>
 
-        <Card className="card yellow">
-          <CardContent>
-            <Typography variant="h6" component="div">
-              Tổng dịch vụ
-            </Typography>
-            <Typography variant="h5">{service}</Typography>
+        {/* Card: Page Views */}
+        <Card className="card page-views">
+          <CardContent className="card-content-top">
+            <Box className="text-section">
+              <Typography variant="h5" className="value">
+                {user}+
+              </Typography>
+              <Typography variant="body2" className="title">
+                Page Views
+              </Typography>
+            </Box>
+            <DescriptionIcon className="icon-wrapper" />
           </CardContent>
+          <div className="card-footer">
+            <Typography variant="body2">10k daily views</Typography>
+            <TrendingUpIcon className="chart-icon" />
+          </div>
         </Card>
 
-        <Card className="card red">
-          <CardContent>
-            <Typography variant="h6" component="div">
-              Số trung tâm
-            </Typography>
-            <Typography variant="h5">{center}</Typography>
+        {/* Card: Downloads */}
+        <Card className="card downloads">
+          <CardContent className="card-content-top">
+            <Box className="text-section">
+              <Typography variant="h5" className="value">
+                {service}
+              </Typography>
+              <Typography variant="body2" className="title">
+                Downloads
+              </Typography>
+            </Box>
+            <ThumbUpAltIcon className="icon-wrapper" />
           </CardContent>
-        </Card>
-        <Card className="card purple ">
-          <CardContent>
-            <Typography variant="h6" component="div">
-              Tổng lượt đặt
-            </Typography>
-            <Typography variant="h5">{appointments}</Typography>
-          </CardContent>
+          <div className="card-footer">
+            <Typography variant="body2">1k download in App store</Typography>
+            <TrendingUpIcon className="chart-icon" />
+          </div>
         </Card>
       </div>
-      <div className="date-picker-container">
-        <FormControl sx={{ minWidth: 120, margin: "0 10px" }}>
-          <InputLabel>Tháng</InputLabel>
-          <Select
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            label="Tháng"
-          >
-            {[...Array(12)].map((_, index) => (
-              <MenuItem key={index} value={index + 1}>
-                Tháng {index + 1}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: 120, margin: "0 10px" }}>
-          <InputLabel>Năm</InputLabel>
-          <Select
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            label="Năm"
-          >
-            {[2023, 2024].map((yearOption) => (
-              <MenuItem key={yearOption} value={yearOption}>
-                {yearOption}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </div>
-      {/* Biểu đồ ComposedChart */}
-
-      <div className="chart-container">
-        {/* Biểu đồ doanh thu (LineChart) */}
-        <div className="area-chart-container">
-          <Typography variant="h6" component="div" className="chart-title">
-            Biểu đồ tổng doanh thu trong tháng
-          </Typography>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={revenue}
-              margin={{ left: 40, right: 20, top: 10, bottom: 10 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="pay_month" />
-              <YAxis
-                label={{
-                  value: "Doanh thu",
-                  angle: -90,
-                  position: "insideLeft",
-                }}
-                tickFormatter={formatCurrency} //
-              />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Legend />
-              <Area
-                type="monotone"
-                dataKey="total_revenue"
-                stroke="#8884d8"
-                fill="#8884d8"
-                name="Tổng doanh thu trong tháng"
-              >
-                <LabelList
-                  dataKey="total_revenue"
-                  position="top"
-                  formatter={(value) => formatCurrency(value)}
-                />
-              </Area>
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Biểu đồ thanh (BarChart) */}
-        <div className="bar-chart-container">
-          <Typography variant="h6" component="div" className="chart-title">
-            Biểu đồ tổng lịch hẹn theo tháng
-          </Typography>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={datayear}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="appointment_month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar
-                dataKey="total_appoinments_month"
-                fill="#f03232"
-                name="Số lịch hẹn trong tháng"
-              >
-                <LabelList dataKey="total_appoinments_month" position="top" />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="flow-container">
+        {appointmentStatusCounts ? (
+          <AppointmentFlow statusCounts={appointmentStatusCounts} />
+        ) : (
+          <Typography>Đang tải dữ liệu luồng...</Typography>
+        )}
       </div>
 
-      {/* Biểu đồ kết hợp (ComposedChart) */}
-      <div className="composed-chart-container">
-        <Typography variant="h6" component="div" className="chart-title">
-          Biểu đồ tổng hợp lịch hẹn và người dùng trong tháng
-        </Typography>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={datamonth}>
-            <XAxis
-              dataKey="appointment_date"
-              tickFormatter={(date) => {
-                const [year, month, day] = date.split("-");
-                return `${day}-${month}-${year}`;
-              }}
-            />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <CartesianGrid stroke="#f5f5f5" />
-            <Bar
-              dataKey="total_user"
-              barSize={20}
-              fill="#413ea0"
-              name="Số người dùng"
-            >
-              <LabelList dataKey="total_user" position="top" />
-            </Bar>
-            <Line
-              type="total_appoinments"
-              dataKey="total_appoinments"
-              stroke="#ff7300"
-              name="Số lịch hẹn"
-            >
-              <LabelList dataKey="total_appoinments" position="top" />
-            </Line>
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Biểu đồ doanh thu (RevenueChart) */}
+      <RevenueChart />
+
+      {/* Biểu đồ số lượng đặt lịch  (AppointmentChart) */}
+      <TotalAppointChart />
+
+      {/* Biểu đồ doanh thu phụ tùng (AccessoryRevenueChart) */}
+      <AccessoryRevenueChart />
     </div>
   );
 };

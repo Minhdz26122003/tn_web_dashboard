@@ -37,7 +37,7 @@ export default function PayModal({ open, onClose, appointmentId }) {
       setLoading(true);
       try {
         const res = await ApiService.get(
-          `${url}apihm/Admin/Payment/get_payment.php`,
+          `${url}apihm/Admin/Payment/get_payment_total.php`,
           {
             params: { appointment_id: appointmentId },
           }

@@ -44,7 +44,6 @@ const AppointmentController = (url) => {
 
   const filteredAppointments = appointments.filter((appointment) => {
     if (value === 0) {
-      // Nếu value là 0 (tab "Tất cả")
       return true;
     }
     //status(chỉ mục tab - 1)
@@ -96,7 +95,7 @@ const AppointmentController = (url) => {
         return;
       }
       const response = await ApiService.get(
-        `<span class="math-inline">\{url\}apihm/Admin/Appointment/search\_appoint\.php?start\_date\=</span>{startDate}&end_date=${endDate}`
+        `${url}apihm/Admin/Appointment/search_appoint.php?start_date=${startDate}&end_date=${endDate}`
       );
       if (response.data.success) {
         const appoint_data = (response.data.appointments || []).map(
@@ -143,9 +142,19 @@ const AppointmentController = (url) => {
   const btnStatus = (trangThai) => {
     switch (trangThai) {
       case 0: // Chưa xác nhận
-        return { confirm: false, cancel: false, action: null };
+        return {
+          confirm: false,
+          cancel: false,
+          action: null,
+          viewSettlement: true,
+        };
       case 1: // Chưa xác nhận
-        return { confirm: true, cancel: true, action: "confirm" };
+        return {
+          confirm: true,
+          cancel: true,
+          action: "confirm",
+          viewSettlement: true,
+        };
       case 2: // Đang báo giá
         return { confirm: false, cancel: false, action: null };
       case 3: // Đã chấp nhận báo giá
@@ -169,7 +178,7 @@ const AppointmentController = (url) => {
         return {
           confirm: false,
           cancel: false,
-          action: null,
+          action: "paid",
         };
       case 7: // Thanh toán
         return { confirm: true, cancel: false, action: "paid" };
@@ -185,7 +194,7 @@ const AppointmentController = (url) => {
         `${url}apihm/Admin/Appointment/cancel_appoint.php`,
         {
           appointment_id,
-          lydohuy: lyDo,
+          reason: lyDo,
         }
       );
 
@@ -297,7 +306,7 @@ const AppointmentController = (url) => {
   const confirmPayment = async (id) => {
     try {
       const res = await ApiService.post(
-        `${url}apihm/Admin/Payment/paymented_appoint.php`,
+        `${url}apihm/Admin/Appointment/paymented_appoint.php`,
         { appointment_id: id }
       );
       if (res.data.success) {
@@ -309,7 +318,7 @@ const AppointmentController = (url) => {
       }
     } catch (err) {
       console.error("Lỗi xác nhận thanh toán:", err);
-      setMessage("Xác nhận thanh toán thất bại!");
+      setMessage(err.message || "Xác nhận thanh toán thất bại!");
       setOpenSnackbar(true);
     }
   };
@@ -399,7 +408,7 @@ const AppointmentController = (url) => {
       case "send_invoice":
         sendInvoice(id);
         break;
-      case "confirm_payment":
+      case "paid":
         confirmPayment(id);
         break;
       default:

@@ -2,31 +2,172 @@
   display: flex;
   flex-direction: column;
   padding: 20px 0px 20px 0px;
-  gap: 40px;
+  gap: 10px;
   overflow-x: hidden;
   width: 100%;
   box-sizing: border-box;
 }
+.flow-container {
+  display: block;
+  margin-left: -18px;
+}
+/* NEW: Styles for Flowchart container */
+.flowchart-wrapper {
+  width: 100%; /* Đảm bảo wrapper chiếm toàn bộ chiều rộng */
+  padding: 0 20px; /* Căn chỉnh với padding của cards-container */
+  box-sizing: border-box; /* Bao gồm padding trong chiều rộng */
+}
 
 /* Vùng chứa các thẻ (Card) */
 .cards-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 20px;
+  display: grid; /* Sử dụng Grid để dễ dàng sắp xếp các cột */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  ); /* Tối ưu cho responsive */
+  gap: 20px; /* Khoảng cách giữa các card */
+  justify-content: center; /* Căn giữa các card nếu có ít hơn 4 card */
+  padding: 0 20px 20px 0px; /* Thêm padding ngang để căn chỉnh với các phần khác */
 }
 
 .card {
-  width: 200px;
-  border-radius: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  background-color: #ffffff; /* Nền trắng cho card */
+  border-radius: 12px; /* Bo góc nhẹ nhàng */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Đổ bóng sâu hơn */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden; /* Đảm bảo nội dung không tràn ra ngoài các góc bo */
+  display: flex;
+  flex-direction: column;
+  height: auto; /* Chiều cao tự động */
+  min-height: 150px; /* Chiều cao tối thiểu */
 }
 
 .card:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px); /* Hiệu ứng nhấc lên khi hover */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Đổ bóng đậm hơn khi hover */
 }
 
+.card-content-top {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Căn trên cùng */
+  flex-grow: 1; /* Cho phép phần này mở rộng */
+}
+
+.card-content-top .icon-wrapper {
+  font-size: 40px; /* Kích thước biểu tượng lớn */
+  color: #a0a0a0; /* Màu xám cho biểu tượng */
+}
+
+.card-content-top .text-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.card-content-top .value {
+  font-size: 1.5em; /* Kích thước số liệu lớn */
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.card-content-top .title {
+  font-size: 0.9em;
+  color: #777;
+  text-transform: uppercase;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px; /* Padding cho phần chân */
+  font-size: 0.85em;
+  color: #fff; /* Màu chữ trắng cho phần chân */
+  /* border-radius: 0 0 12px 12px; Bo góc dưới */
+}
+
+.card-footer .chart-icon {
+  font-size: 1.2em;
+  color: #fff;
+}
+
+/* Các lớp màu cho footer và biểu tượng */
+.card.earning .card-footer {
+  background-color: #ff9800; /* Màu cam */
+}
+.card.earning .card-content-top .value {
+  color: #ff9800;
+}
+.card.earning .icon-wrapper {
+  color: #ff9800; /* Icon màu cam */
+}
+
+.card.task .card-footer {
+  background-color: #f44336; /* Màu đỏ */
+}
+.card.task .card-content-top .value {
+  color: #f44336;
+}
+.card.task .icon-wrapper {
+  color: #f44336; /* Icon màu đỏ */
+}
+
+.card.page-views .card-footer {
+  background-color: #4caf50; /* Màu xanh lá */
+}
+.card.page-views .card-content-top .value {
+  color: #4caf50;
+}
+.card.page-views .icon-wrapper {
+  color: #4caf50; /* Icon màu xanh lá */
+}
+
+.card.downloads .card-footer {
+  background-color: #2196f3; /* Màu xanh dương */
+}
+.card.downloads .card-content-top .value {
+  color: #2196f3;
+}
+.card.downloads .icon-wrapper {
+  color: #2196f3; /* Icon màu xanh dương */
+}
+
+/* Biểu đồ nhỏ trong footer (placeholder) */
+.mini-chart {
+  width: 30px; /* Kích thước nhỏ cho biểu đồ */
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Các CSS cũ bạn có thể bỏ qua hoặc chỉnh sửa lại theo ý muốn */
+/* .card.green {
+  background-color: #aef8ae;
+}
+
+.card.yellow {
+  background-color: #fce9b1;
+}
+
+.card.red {
+  background-color: #f6acac;
+}
+
+.card.purple {
+  background-color: #f1b3fc;
+} */
+.card:hover {
+  transform: scale(1.05);
+}
+/* 
 .card.green {
   background-color: #aef8ae;
 }
@@ -41,7 +182,7 @@
 
 .card.purple {
   background-color: #f1b3fc;
-}
+} */
 
 /* Khu vực chọn tháng, năm */
 .date-picker-container {
@@ -56,10 +197,7 @@
 
 /* Biểu đồ (nếu có) */
 .chart-container {
-  display: flex;
-
-  flex-direction: row;
-  gap: 40px;
+  display: block;
 }
 
 /* Container biểu đồ demo (nếu có) */
@@ -73,4 +211,61 @@
   padding-bottom: 50px;
   padding: 20px 20px 60px; /* padding-bottom để tránh che trục X */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+/* Container tổng */
+.dashboard-container {
+  padding: 20px;
+}
+
+/* Cards thống kê */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Filters */
+.date-picker-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* Các biểu đồ cũ */
+.chart-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* Paper bao chart mới */
+.unconfirmed-chart-paper {
+  padding: 16px;
+  margin-top: 32px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Header trong paper */
+.unconfirmed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Wrapper để setting height cho ResponsiveContainer */
+.unconfirmed-chart-wrapper {
+  width: 100%;
+  height: 250px;
+}
+
+/* Media queries nếu cần responsive */
+@media (max-width: 768px) {
+  .chart-container {
+    grid-template-columns: 1fr;
+  }
 }

@@ -435,7 +435,7 @@ const Appointment = () => {
               <TableCell>Thời gian hẹn</TableCell>
               <TableCell>Trạng thái</TableCell>
               {value === 9 && <TableCell>Lý do hủy</TableCell>}
-              {value != 8 && <TableCell>Hành động</TableCell>}
+              {value != 8 && value != 9 && <TableCell>Hành động</TableCell>}
             </TableRow>
           </TableHead>
 
@@ -475,7 +475,7 @@ const Appointment = () => {
                       {convertTrangThai(appointment.status)}
                     </TableCell>
 
-                    {value === 8 && (
+                    {value === 9 && (
                       <TableCell>
                         {appointment.reason || "Chưa có lý do"}
                       </TableCell>
@@ -591,7 +591,7 @@ const Appointment = () => {
                           </Button>
                           <Button
                             onClick={() =>
-                              Huylich(selectedAppointmentId, reason)
+                              cancelAppointment(selectedAppointmentId, reason)
                             }
                             color="primary"
                           >

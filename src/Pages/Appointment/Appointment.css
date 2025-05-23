@@ -6,9 +6,8 @@
 
 /* Thanh công cụ trên (Tab + Date Search) */
 .book-topbar {
-  margin-left: -170px;
   justify-content: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 /* Tabs*/

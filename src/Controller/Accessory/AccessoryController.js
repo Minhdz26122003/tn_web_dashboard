@@ -27,7 +27,7 @@ const AccessoryController = (url) => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetchAccessorys(1, pagination.limit);
+    fetchAccessorys();
   }, []);
 
   const fetchAccessorys = async (

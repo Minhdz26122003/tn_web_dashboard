@@ -3,107 +3,146 @@ import axios from "axios";
 import { Snackbar, Alert } from "@mui/material";
 import ApiService from "../../services/ApiCaller";
 import PaymentModel from "../../Model/Payment/PaymentModel";
+
 const PaymentController = (url) => {
-  const [payments, setPayment] = useState([]);
-  const [selectedPayment, setSelectedPayment] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [invoices, setInvoices] = useState([]);
+  const [value, setValue] = useState(0); // 0: All, 1: Unpaid, 2: Paid, 3: Offline, 4: Online
   const [startDate, setStartDate] = useState("");
+  const [message, setMessage] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [settlementOpen, setSettlementOpen] = useState(false);
+  const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     limit: 5,
   });
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
-  useEffect(() => {
-    fetchPayments();
-  }, []);
-  const fetchPayments = async (
+  const [formCounts, setFormCounts] = useState({
+    all: 0,
+    unpaid: 0,
+    paid: 0,
+    offline: 0,
+    online: 0,
+  });
+  const [totalInvoice, setTotalInvoice] = useState(0);
+
+  const fetchInvoices = async (
     page = pagination.currentPage,
-    limit = pagination.limit
+    limit = pagination.limit,
+    status = value
   ) => {
     try {
       const response = await ApiService.get(
-        `${url}myapi/Thanhtoan/gethoadon.php`,
+        `${url}apihm/Admin/Payment/get_payment.php`,
         {
-          params: { page, limit },
+          params: { page, limit, status },
         }
       );
-      const data = response.data;
-      if (data && Array.isArray(data.data)) {
-        const pay_data = data.data.map((pay) => new PaymentModel({ ...pay }));
-        setPayment(pay_data);
-        setPagination({
-          currentPage: data.currentPage,
-          totalPages: data.totalPages,
-          limit,
-        });
-      } else {
-        setPayment([]);
-      }
-    } catch (error) {
-      console.error("Lỗi khi tải hoá đơn :", error);
-    }
-  };
-
-  //TÌM KIẾM HÓA ĐƠN
-  const searchPayments = async (startDate, endDate) => {
-    try {
-      if (!startDate || !endDate) {
-        console.error("Ngày bắt đầu và kết thúc không hợp lệ.");
+      const { success, data: items, pagination, counts } = response.data;
+      if (!success || !Array.isArray(items)) {
+        setInvoices([]);
+        setTotalInvoice(0);
         return;
       }
+      +(
+        // set số liệu thống kê
+        setFormCounts({
+          all: counts.all,
+          unpaid: counts.unpaid,
+          paid: counts.paid,
+          offline: counts.paid_offline,
+          online: counts.paid_online,
+        })
+      );
+      // map về model và set data
+      const pay = items.map((app) => new PaymentModel(app));
+      setTotalInvoice(pagination.totalItems);
+      setInvoices(pay);
+      setPagination({
+        currentPage: pagination.currentPage,
+        totalPages: pagination.totalPages,
+        limit: pagination.limit,
+      });
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      setTotalInvoice(0);
+    }
+  };
+
+  // hàm để mở modal kèm appointmentId
+  const openSettlement = (appointmentId) => {
+    setCurrentAppointmentId(appointmentId);
+    setSettlementOpen(true);
+  };
+  // hàm đóng đơn giản
+  const closeSettlement = () => {
+    setSettlementOpen(false);
+    setCurrentAppointmentId(null);
+  };
+  // Tìm kiếm
+  const searchInvoices = async (start, end) => {
+    if (!start || !end) return;
+    try {
       const response = await ApiService.get(
-        `${url}myapi/Thanhtoan/tkhoadon.php?start_date=${startDate}&end_date=${endDate}`
+        `${url}apihm/Admin/Payment/search_payment.php`,
+        { params: { start_date: start, end_date: end } }
       );
       if (response.data.success) {
-        const pay_data = (response.data.payments || []).map(
-          (app) => new PaymentModel({ ...app })
-        );
-        setPayment(pay_data);
+        setInvoices(response.data.payments.map((inv) => new PaymentModel(inv)));
       } else {
-        setPayment([]);
+        setInvoices([]);
       }
     } catch (error) {
-      console.error("Lỗi khi tìm kiếm hóa đơn:", error);
+      console.error("Error searching invoices:", error);
     }
   };
-  const handlePageChange = (event, value) => {
-    fetchPayments(value, pagination.limit);
-  };
-  useEffect(() => {
-    if (startDate && endDate) {
-      searchPayments(startDate, endDate);
-    } else {
-      fetchPayments();
-    }
-  }, [startDate, endDate]);
 
-  const formatPrice = (giatri) => {
-    if (!giatri) return "0";
-    const numericValue =
-      typeof giatri === "string"
-        ? parseInt(giatri.replace(/\D/g, ""), 10)
-        : giatri;
-    return numericValue.toLocaleString("vi-VN");
+  const handlePageChange = (event, page) => {
+    fetchInvoices(page, pagination.limit, value);
   };
+
+  const handleTabChange = (event, newValue) => {
+    setValue(newValue);
+    fetchInvoices(1, pagination.limit, newValue);
+  };
+
+  useEffect(() => {
+    if (startDate && endDate) searchInvoices(startDate, endDate);
+    else fetchInvoices();
+  }, [startDate, endDate, value]);
+
+  const formatPrice = (amount) => {
+    const num =
+      typeof amount === "string"
+        ? parseInt(amount.replace(/\D/g, ""), 10)
+        : amount;
+    return num.toLocaleString("vi-VN");
+  };
+
   return {
-    payments,
-    selectedPayment,
-    searchTerm,
-    endDate,
+    invoices,
     startDate,
+    endDate,
     pagination,
-    setSelectedPayment,
+    value,
+    message,
+    fetchInvoices,
+    setMessage,
+    settlementOpen,
+    currentAppointmentId,
+    openSettlement,
+    closeSettlement,
+    openSnackbar,
+    setOpenSnackbar,
+    formCounts,
+    totalInvoice,
     setStartDate,
-    setSearchTerm,
     setEndDate,
     handlePageChange,
-    setPagination,
+    handleTabChange,
     formatPrice,
-    setPayment,
-    setSearchTerm,
   };
 };
+
 export default PaymentController;
