@@ -9,7 +9,7 @@ import {
   TextField, // Cho DatePicker
 } from "@mui/material";
 import {
-  AreaChart, // Dùng AreaChart để trông giống biểu đồ doanh thu của bạn
+  AreaChart,
   Area,
   XAxis,
   YAxis,
@@ -19,20 +19,17 @@ import {
   ResponsiveContainer,
   LabelList,
 } from "recharts";
-import axios from "axios"; // Import axios
-import url from "../../Global/ipconfixad"; // Đảm bảo đường dẫn này đúng
+import url from "../../Global/ipconfixad";
 import ApiService from "../../services/ApiCaller";
-// Hàm định dạng số lượng (không cần tiền tệ)
 const formatCount = (value) => {
-  return parseInt(value).toLocaleString("vi-VN"); // Định dạng số nguyên
+  return parseInt(value).toLocaleString("vi-VN");
 };
 
 const TotalAppointmentChart = () => {
   const [appointmentCountsData, setAppointmentCountsData] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [groupBy, setGroupBy] = useState("day"); // Mặc định nhóm theo ngày
-
+  const [groupBy, setGroupBy] = useState("day");
   const fetchAppointmentCounts = async () => {
     try {
       const apiUrl = `${url}apihm/Admin/Statistical/get_total_appointment.php`;
@@ -101,11 +98,11 @@ const TotalAppointmentChart = () => {
         borderRadius: 2,
         bgcolor: "#ffffff",
         boxShadow: 1,
-        mt: 3, // Margin top để tạo khoảng cách với các phần khác
+        mt: 3,
       }}
     >
       <Typography variant="h6" fontWeight="bold" mb={2} sx={{ color: "#333" }}>
-        Biểu đồ số lượng lịch hẹn theo thời gian
+        Biểu đồ số lượng lịch hẹn
       </Typography>
 
       <Box

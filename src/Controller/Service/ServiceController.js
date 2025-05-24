@@ -33,7 +33,7 @@ const ServiceController = (url) => {
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
   useEffect(() => {
-    fetchServices();
+    fetchServices(1, pagination.limit);
     fetchTypeServices();
     if (selectedFile) {
       // tệp được chọn, tạo URL
@@ -234,7 +234,7 @@ const ServiceController = (url) => {
       }
 
       setOpenAdd(false);
-      fetchServices();
+      fetchServices(1, pagination.limit);
     } catch (error) {
       console.error("Lỗi khi thêm:", error);
     }

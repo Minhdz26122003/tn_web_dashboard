@@ -9,31 +9,31 @@
 }
 .flow-container {
   display: block;
-  margin-left: -18px;
+  margin-left: -4px;
 }
 /* NEW: Styles for Flowchart container */
 .flowchart-wrapper {
-  width: 100%; /* Đảm bảo wrapper chiếm toàn bộ chiều rộng */
+  width: 100%;
   padding: 0 20px; /* Căn chỉnh với padding của cards-container */
-  box-sizing: border-box; /* Bao gồm padding trong chiều rộng */
+  box-sizing: border-box;
 }
 
 /* Vùng chứa các thẻ (Card) */
 .cards-container {
-  display: grid; /* Sử dụng Grid để dễ dàng sắp xếp các cột */
+  display: grid;
   grid-template-columns: repeat(
     auto-fit,
     minmax(220px, 1fr)
   ); /* Tối ưu cho responsive */
-  gap: 20px; /* Khoảng cách giữa các card */
+  gap: 20px;
   justify-content: center; /* Căn giữa các card nếu có ít hơn 4 card */
-  padding: 0 20px 20px 0px; /* Thêm padding ngang để căn chỉnh với các phần khác */
+  padding: 0 20px 20px 0px;
 }
 
 .card {
   background-color: #ffffff; /* Nền trắng cho card */
   border-radius: 12px; /* Bo góc nhẹ nhàng */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Đổ bóng sâu hơn */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden; /* Đảm bảo nội dung không tràn ra ngoài các góc bo */
   display: flex;
@@ -105,34 +105,44 @@
   color: #ff9800; /* Icon màu cam */
 }
 
-.card.task .card-footer {
+.card.appointment .card-footer {
   background-color: #f44336; /* Màu đỏ */
 }
-.card.task .card-content-top .value {
+.card.appointment .card-content-top .value {
   color: #f44336;
 }
-.card.task .icon-wrapper {
+.card.appointment .icon-wrapper {
   color: #f44336; /* Icon màu đỏ */
 }
 
-.card.page-views .card-footer {
+.card.service .card-footer {
   background-color: #4caf50; /* Màu xanh lá */
 }
-.card.page-views .card-content-top .value {
+.card.service .card-content-top .value {
   color: #4caf50;
 }
-.card.page-views .icon-wrapper {
+.card.service .icon-wrapper {
   color: #4caf50; /* Icon màu xanh lá */
 }
 
-.card.downloads .card-footer {
+.card.user .card-footer {
   background-color: #2196f3; /* Màu xanh dương */
 }
-.card.downloads .card-content-top .value {
+.card.user .card-content-top .value {
   color: #2196f3;
 }
-.card.downloads .icon-wrapper {
+.card.user .icon-wrapper {
   color: #2196f3; /* Icon màu xanh dương */
+}
+
+.card.car .card-footer {
+  background-color: #a602f7; /* Màu xanh dương */
+}
+.card.car .card-content-top .value {
+  color: #a602f7;
+}
+.card.car .icon-wrapper {
+  color: #a602f7; /* Icon màu xanh dương */
 }
 
 /* Biểu đồ nhỏ trong footer (placeholder) */
@@ -147,42 +157,6 @@
   font-size: 0.7em;
   color: rgba(255, 255, 255, 0.8);
 }
-
-/* Các CSS cũ bạn có thể bỏ qua hoặc chỉnh sửa lại theo ý muốn */
-/* .card.green {
-  background-color: #aef8ae;
-}
-
-.card.yellow {
-  background-color: #fce9b1;
-}
-
-.card.red {
-  background-color: #f6acac;
-}
-
-.card.purple {
-  background-color: #f1b3fc;
-} */
-.card:hover {
-  transform: scale(1.05);
-}
-/* 
-.card.green {
-  background-color: #aef8ae;
-}
-
-.card.yellow {
-  background-color: #fce9b1;
-}
-
-.card.red {
-  background-color: #f6acac;
-}
-
-.card.purple {
-  background-color: #f1b3fc;
-} */
 
 /* Khu vực chọn tháng, năm */
 .date-picker-container {

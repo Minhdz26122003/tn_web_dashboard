@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -32,6 +31,9 @@ import {
   Add as AddIcon,
 } from "@mui/icons-material";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
+import KeyIcon from "@mui/icons-material/Key";
 import { Snackbar, Alert } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import "./Accounts.css";
@@ -53,9 +55,9 @@ const Account = () => {
     setOpenSnackbar,
     openSnackbar,
     filteredStatus,
+    handleLock,
     handleDetail,
-    fetchAccounts,
-    setMessage,
+    handleUnLock,
     setStatus,
     setSelectedAccount,
     handleSearch,
@@ -63,7 +65,6 @@ const Account = () => {
     handleDetailClose,
     handleAddSubmit,
     handleEditSubmit,
-    handleDelete,
     handleEdit,
     handleEditClose,
     handleAddClick,
@@ -163,11 +164,30 @@ const Account = () => {
                           <RemoveRedEyeIcon />
                         </IconButton>
                         <IconButton
-                          color="primary"
+                          color="warning"
                           onClick={() => handleEdit(account)}
                         >
                           <EditIcon />
                         </IconButton>
+                        {account.status !== 3 && (
+                          <IconButton
+                            color="error"
+                            onClick={() => handleLock(account.uid)}
+                            title="Khóa tài khoản"
+                          >
+                            <LockIcon />
+                          </IconButton>
+                        )}
+
+                        {account.status === 3 && (
+                          <IconButton
+                            color="info"
+                            onClick={() => handleUnLock(account.uid)}
+                            title="Mở khóa tài khoản"
+                          >
+                            <KeyIcon />
+                          </IconButton>
+                        )}
                       </TableCell>
                     </TableRow>
                   );

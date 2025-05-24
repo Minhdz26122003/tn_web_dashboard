@@ -9,7 +9,7 @@ import {
   TextField,
 } from "@mui/material";
 import {
-  BarChart, // Chọn BarChart để dễ so sánh giữa các kỳ
+  BarChart,
   Bar,
   XAxis,
   YAxis,

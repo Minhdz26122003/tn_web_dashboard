@@ -6,7 +6,7 @@ import {
   InputLabel,
   FormControl,
   Box,
-  TextField, // Import TextField cho DatePicker
+  TextField,
 } from "@mui/material";
 import {
   BarChart,
@@ -21,12 +21,11 @@ import {
 } from "recharts";
 
 import url from "../../Global/ipconfixad";
-import ApiService from "../../services/ApiCaller"; // Đảm bảo đường dẫn này đúng
+import ApiService from "../../services/ApiCaller";
 
-// Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
   if (value === null || value === undefined) {
-    return "0 VND"; // Xử lý giá trị null/undefined
+    return "0 VND";
   }
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -34,15 +33,12 @@ const formatCurrency = (value) => {
   }).format(value);
 };
 
-// --- Component Biểu đồ Doanh thu Thanh toán (Online/Offline) ---
 const RevenueChart = () => {
-  // Loại bỏ prop `baseUrl` vì `url` đã được import trực tiếp
   const [revenueData, setRevenueData] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [groupBy, setGroupBy] = useState("day"); // 'day', 'month', 'year'
 
-  // Fetch data
   const fetchRevenueData = async () => {
     try {
       const params = {
@@ -50,16 +46,15 @@ const RevenueChart = () => {
         end_date: endDate,
         group_by: groupBy,
       };
-      // Đảm bảo URL API là đúng
+
       const response = await ApiService.get(
-        `${url}apihm/Admin/Statistical/get_total_amount.php`, // Giả sử đây là API doanh thu mới của bạn
+        `${url}apihm/Admin/Statistical/get_total_amount.php`,
         { params }
       );
       if (response.data.success) {
-        // Xử lý dữ liệu để thêm trường 'total' cho LabelList
         const processedData = response.data.data.map((item) => ({
           ...item,
-          // Đảm bảo item.total_online và item.total_offline là số
+
           total_online: parseFloat(item.total_online || 0),
           total_offline: parseFloat(item.total_offline || 0),
           total:
@@ -77,7 +72,6 @@ const RevenueChart = () => {
     }
   };
 
-  // Thiết lập ngày mặc định khi component được mount lần đầu
   useEffect(() => {
     const today = new Date();
     const thirtyDaysAgo = new Date(today);
@@ -85,19 +79,17 @@ const RevenueChart = () => {
 
     setStartDate(thirtyDaysAgo.toISOString().split("T")[0]);
     setEndDate(today.toISOString().split("T")[0]);
-  }, []); // Chỉ chạy một lần khi mount
+  }, []);
 
   // Gọi API khi startDate, endDate hoặc groupBy thay đổi
   useEffect(() => {
     if (startDate && endDate) {
-      // Chỉ fetch khi có đủ ngày bắt đầu và kết thúc
       fetchRevenueData();
     }
   }, [startDate, endDate, groupBy]);
 
-  // Hàm để định dạng trục X dựa trên kiểu nhóm
   const xAxisTickFormatter = (value) => {
-    const stringValue = String(value); // Đảm bảo giá trị là chuỗi
+    const stringValue = String(value);
 
     if (groupBy === "day") {
       const parts = stringValue.split("-");
@@ -112,12 +104,10 @@ const RevenueChart = () => {
     } else if (groupBy === "year") {
       return stringValue; // Chỉ hiển thị năm (ví dụ: 2024)
     }
-    return stringValue; // Trả về giá trị gốc nếu không khớp định dạng
+    return stringValue;
   };
 
-  // Lựa chọn dataKey cho XAxis dựa trên groupBy
-  // API của bạn trả về `time_period` bất kể groupBy là gì
-  const xAxisDataKey = "time_period";
+  const xAxisDataKey = "payment_date_formatted";
 
   return (
     <Box
@@ -131,7 +121,7 @@ const RevenueChart = () => {
       }}
     >
       <Typography variant="h6" fontWeight="bold" mb={2} sx={{ color: "#333" }}>
-        Biểu đồ doanh thu theo thời gian
+        Biểu đồ doanh thu
       </Typography>
 
       <Box
@@ -177,9 +167,9 @@ const RevenueChart = () => {
         <BarChart
           data={revenueData}
           margin={{
-            top: 20,
+            top: 10,
             right: 30,
-            left: 60, // Tăng left margin để nhãn trục Y không bị che
+            left: 60,
             bottom: 5,
           }}
         >
@@ -191,13 +181,14 @@ const RevenueChart = () => {
           <Bar
             dataKey="total_online"
             stackId="revenue"
-            fill="#4CAF50" // Màu xanh lá cây cho Online
+            fill="#fa0202"
             name="Doanh thu Online"
+            color=""
           />
           <Bar
             dataKey="total_offline"
             stackId="revenue"
-            fill="#2196F3" // Màu xanh dương cho Trực tiếp
+            fill="#2196F3"
             name="Doanh thu Trực tiếp"
           />
           {/* LabelList cho tổng doanh thu trên mỗi cột */}

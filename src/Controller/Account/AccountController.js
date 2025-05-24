@@ -192,27 +192,74 @@ const AccountController = (url) => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa tài khoản này không?"))
+  // const handleDelete = async (id) => {
+  //   if (!window.confirm("Bạn có chắc chắn muốn xóa tài khoản này không?"))
+  //     return;
+
+  //   try {
+  //     const response = await ApiService.delete(
+  //       `${url}myapi/Taikhoan/xoataikhoan`,
+  //       {
+  //         params: { iduser: id },
+  //       }
+  //     );
+  //     if (response.data.success) {
+  //       setMessage("Xóa tài khoản thành công!");
+  //       setOpenSnackbar(true);
+  //     } else {
+  //       setMessage("Lỗi: " + response.data.message);
+  //       setOpenSnackbar(true);
+  //     }
+  //     setAccounts(accounts.filter((account) => account.iduser !== id));
+  //   } catch (error) {
+  //     console.error("Xóa tài khoản không thành công:", error);
+  //   }
+  // };
+  const handleLock = async (uid) => {
+    if (!window.confirm("Bạn có chắc chắn muốn khóa tài khoản này không?"))
       return;
 
     try {
-      const response = await ApiService.delete(
-        `${url}myapi/Taikhoan/xoataikhoan`,
+      const response = await ApiService.post(
+        `${url}apihm/Admin/Account/lock_acc.php`,
         {
-          params: { iduser: id },
+          uid,
         }
       );
       if (response.data.success) {
-        setMessage("Xóa tài khoản thành công!");
+        setMessage("Khóa tài khoản thành công!");
         setOpenSnackbar(true);
+        fetchAccounts();
       } else {
         setMessage("Lỗi: " + response.data.message);
         setOpenSnackbar(true);
       }
-      setAccounts(accounts.filter((account) => account.iduser !== id));
     } catch (error) {
-      console.error("Xóa tài khoản không thành công:", error);
+      console.error("Khóa tài khoản không thành công:", error);
+    }
+  };
+
+  const handleUnLock = async (uid) => {
+    if (!window.confirm("Bạn có chắc chắn muốn mở khóa tài khoản này không?"))
+      return;
+
+    try {
+      const response = await ApiService.post(
+        `${url}apihm/Admin/Account/unlock_acc.php`,
+        {
+          uid,
+        }
+      );
+      if (response.data.success) {
+        setMessage("Mở khóa tài khoản thành công!");
+        setOpenSnackbar(true);
+        fetchAccounts();
+      } else {
+        setMessage("Lỗi: " + response.data.message);
+        setOpenSnackbar(true);
+      }
+    } catch (error) {
+      console.error("mở khóa tài khoản không thành công:", error);
     }
   };
 
@@ -268,8 +315,10 @@ const AccountController = (url) => {
     genderMapping,
     message,
     setOpenSnackbar,
+    handleLock,
     openSnackbar,
     filteredStatus,
+    handleUnLock,
     fetchAccounts,
     handleDetailClose,
     handleDetail,
@@ -280,7 +329,7 @@ const AccountController = (url) => {
     handlePageChange,
     handleAddSubmit,
     handleEditSubmit,
-    handleDelete,
+    //handleDelete,
     handleEdit,
     handleEditClose,
     handleAddClick,

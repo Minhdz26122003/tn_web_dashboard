@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // Import biểu tượng dấu tích
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-// Node hình elip (giữ nguyên)
 const FlowNode = ({ label }) => (
   <Box
     sx={{
@@ -218,7 +217,7 @@ const AppointmentFlow = ({ statusCounts }) => {
   return (
     <Box
       sx={{
-        p: 2,
+        p: 0.5,
         bgcolor: "#f0f2f5",
         minHeight: "auto",
         display: "flex",

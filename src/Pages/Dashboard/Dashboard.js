@@ -1,32 +1,6 @@
 // Dashboard.js
-import React, { useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Box,
-  TextField, // Import TextField cho DatePicker
-  Button, // Import Button
-} from "@mui/material";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  Line,
-  LabelList,
-  AreaChart, // Đảm bảo AreaChart đã được import nếu bạn vẫn dùng
-} from "recharts";
+import { useEffect, useState } from "react";
+import { Card, CardContent, Typography, Box } from "@mui/material";
 
 import axios from "axios";
 import "./dashboard.css";
@@ -38,6 +12,8 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import PersonIcon from "@mui/icons-material/Person";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 
 import AppointmentFlow from "./AppointmentFlow";
 import TotalAppointChart from "./TotalAppointChart";
@@ -50,27 +26,25 @@ const Dashboard = () => {
   const [user, setTotalUsers] = useState(0);
   const [service, setTotalServices] = useState(0);
   const [appointments, setTotalApps] = useState(0);
-  const [price, setPrice] = useState(0);
-  const [datamonth, setDataMonth] = useState([]);
-  const [datayear, setDataYear] = useState([]);
-  const [revenue, setRevenue] = useState([]);
-
-  const [appointmentStatusCounts, setAppointmentStatusCounts] = useState(null);
+  const [revenue, setTotalRevenue] = useState(0);
+  const [car, setTotalCar] = useState(0);
+  const [appointStatusFlows, setAppointStatusFlows] = useState(null);
 
   useEffect(() => {
-    TkeMonth();
-    TkeYear();
-    TkeDthu();
+    fetchCar();
     fetchUser();
     fetchService();
     fetchAppointment();
     fetchRenvenue();
-    fetchAppointmentStatusCounts();
-  }, [month, year]);
+    fetchAppointFlows();
+  }, []);
 
+  // só người dùng
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${url}myapi/Thongke/tkenguoidung.php`);
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Statistical/card_total_user.php`
+      );
       if (response.data.success) {
         setTotalUsers(response.data.total_user);
       }
@@ -78,118 +52,73 @@ const Dashboard = () => {
       console.error("Error fetching user statistics:", error);
     }
   };
+
+  // số dịch vụ
   const fetchService = async () => {
     try {
-      const response = await axios.get(`${url}myapi/Thongke/tkedichvu.php`);
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Statistical/card_total_service.php`
+      );
+      console.log(
+        "apihm/Admin/Statistical/card_total_revenue.php",
+        response.data
+      );
       if (response.data.success) {
-        setTotalServices(response.data.total_services);
+        setTotalServices(response.data.total_service);
       }
     } catch (error) {
       console.error("Error fetching service statistics:", error);
     }
   };
+  // số lịch hẹn
   const fetchAppointment = async () => {
     try {
-      const response = await axios.get(`${url}myapi/Thongke/tkelichhen.php?`);
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Statistical/card_total_appoint.php`
+      );
       if (response.data.success) {
-        setTotalApps(response.data.solich);
+        setTotalApps(response.data.total_appoi);
       }
     } catch (error) {
       console.error("Error fetching appointment statistics:", error);
     }
   };
+  // số xe
+  const fetchCar = async () => {
+    try {
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Statistical/card_total_car.php`
+      );
+      if (response.data.success) {
+        setTotalCar(response.data.total_car);
+      }
+    } catch (error) {
+      console.error("Error fetching car statistics:", error);
+    }
+  };
+  // doanh thu
   const fetchRenvenue = async () => {
     try {
-      const response = await axios.get(
-        `${url}myapi/Thongke/tkedoanhthusort.php`
+      const response = await ApiService.get(
+        `${url}apihm/Admin/Statistical/card_total_revenue.php`
       );
-      console.log(response.data);
+
       if (response.data.success) {
-        setPrice(response.data.doanhthu);
+        setTotalRevenue(response.data.total_revenue);
       }
     } catch (error) {
       console.error("Error fetching doanh thu :", error);
     }
   };
 
-  const TkeMonth = async () => {
-    try {
-      const response = await axios.get(
-        `${url}myapi/Thongke/tkelichhenthang.php?month=${month}&year=${year}`
-      );
-      if (response.data.success) {
-        const chartData = response.data.statistics.daily_appointments.map(
-          (item) => ({
-            appointment_date: item.appointment_date,
-            appointments: parseInt(item.daily_appointments, 10),
-
-            total_daily_appointments: parseInt(item.daily_appointments, 10),
-            total_user: parseInt(item.total_users, 10),
-            total_appoinments: parseInt(item.total_appointments, 10),
-          })
-        );
-        setDataMonth(chartData);
-      }
-    } catch (error) {
-      console.error("Error fetching statistics:", error);
-    }
-  };
-  const TkeYear = async () => {
-    try {
-      const response = await axios.get(
-        `${url}myapi/Thongke/tkelichhennam.php?&year=${year}`
-      );
-      if (response.data.success) {
-        const chartDatas = response.data.statistics.monthly_appointments.map(
-          (item) => ({
-            appointment_month: item.appointment_month,
-            total_appoinments_month: parseInt(item.total_appointments, 10),
-          })
-        );
-        setDataYear(chartDatas);
-      }
-    } catch (error) {
-      console.error("Error fetching statistics:", error);
-    }
-  };
-  const TkeDthu = async () => {
-    try {
-      const response = await axios.get(
-        `${url}myapi/Thongke/tkedoanhthu.php?&year=${year}`
-      );
-      //console.log("API response:", response.data);
-
-      if (
-        response.data.success &&
-        Array.isArray(response.data.statistics?.monthly_revenue)
-      ) {
-        const chartDatas2 = response.data.statistics.monthly_revenue.map(
-          (item) => ({
-            pay_month: item.pay_month, // Tháng
-            total_revenue: parseFloat(item.total_revenue), // Doanh thu
-          })
-        );
-        setRevenue(chartDatas2);
-      } else {
-        console.error(
-          "Invalid data structure or empty monthly_revenue:",
-          response.data
-        );
-        setRevenue([]);
-      }
-    } catch (error) {
-      console.error("Error fetching revenue:", error);
-      setRevenue([]);
-    }
-  };
-
-  const fetchAppointmentStatusCounts = async () => {
+  // Hàm lấy dữ liệu luồng lịch hẹn
+  const fetchAppointFlows = async () => {
     try {
       const response = await ApiService.get(
         `${url}apihm/Admin/Statistical/get_appointment_status_counts.php`
       );
       if (response.data.success) {
-        setAppointmentStatusCounts(response.data.data);
+        setAppointStatusFlows(response.data.data);
       } else {
         console.error(
           "Error fetching appointment status counts:",
@@ -211,87 +140,106 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Container for cards */}
       <div className="cards-container">
         {/* Card: All Earnings */}
         <Card className="card earning">
           <CardContent className="card-content-top">
             <Box className="text-section">
               <Typography variant="h5" className="value">
-                {formatCurrency(price)}
+                {formatCurrency(revenue)}
               </Typography>
               <Typography variant="body2" className="title">
-                All Earnings
+                Doanh thu
               </Typography>
             </Box>
             <AttachMoneyIcon className="icon-wrapper" />
           </CardContent>
           <div className="card-footer">
-            <Typography variant="body2">10% changes on profit</Typography>
+            <Typography variant="body2">Số doanh thu</Typography>
             <TrendingUpIcon className="chart-icon" /> {/* Biểu tượng biểu đồ */}
           </div>
         </Card>
 
-        {/* Card: Task */}
-        <Card className="card task">
+        {/* Card: appointment */}
+        <Card className="card appointment">
           <CardContent className="card-content-top">
             <Box className="text-section">
               <Typography variant="h5" className="value">
-                {appointments}
+                {appointments}+
               </Typography>
               <Typography variant="body2" className="title">
-                Task
+                Lịch hẹn
               </Typography>
             </Box>
             <CalendarTodayIcon className="icon-wrapper" />
           </CardContent>
           <div className="card-footer">
-            <Typography variant="body2">28% task performance</Typography>
+            <Typography variant="body2">Tổng số lịch hẹn</Typography>
             <TrendingUpIcon className="chart-icon" />
           </div>
         </Card>
 
-        {/* Card: Page Views */}
-        <Card className="card page-views">
+        {/* Card: Page service  */}
+        <Card className="card service">
+          <CardContent className="card-content-top">
+            <Box className="text-section">
+              <Typography variant="h5" className="value">
+                {service}+
+              </Typography>
+              <Typography variant="body2" className="title">
+                Dịch vụ
+              </Typography>
+            </Box>
+            <DescriptionIcon className="icon-wrapper" />
+          </CardContent>
+          <div className="card-footer">
+            <Typography variant="body2">Tổng số dịch vụ</Typography>
+            <TrendingUpIcon className="chart-icon" />
+          </div>
+        </Card>
+
+        {/* Card: user */}
+        <Card className="card user">
           <CardContent className="card-content-top">
             <Box className="text-section">
               <Typography variant="h5" className="value">
                 {user}+
               </Typography>
               <Typography variant="body2" className="title">
-                Page Views
+                Người dùng
               </Typography>
             </Box>
-            <DescriptionIcon className="icon-wrapper" />
+            <PersonIcon className="icon-wrapper" />
           </CardContent>
           <div className="card-footer">
-            <Typography variant="body2">10k daily views</Typography>
+            <Typography variant="body2">Số người dùng hệ thống</Typography>
             <TrendingUpIcon className="chart-icon" />
           </div>
         </Card>
 
-        {/* Card: Downloads */}
-        <Card className="card downloads">
+        {/* Card: car */}
+        <Card className="card car">
           <CardContent className="card-content-top">
             <Box className="text-section">
               <Typography variant="h5" className="value">
-                {service}
+                {car}+
               </Typography>
               <Typography variant="body2" className="title">
-                Downloads
+                Xe
               </Typography>
             </Box>
-            <ThumbUpAltIcon className="icon-wrapper" />
+            <DirectionsCarIcon className="icon-wrapper" />
           </CardContent>
           <div className="card-footer">
-            <Typography variant="body2">1k download in App store</Typography>
+            <Typography variant="body2">Số xe đã phục vụ</Typography>
             <TrendingUpIcon className="chart-icon" />
           </div>
         </Card>
       </div>
+
       <div className="flow-container">
-        {appointmentStatusCounts ? (
-          <AppointmentFlow statusCounts={appointmentStatusCounts} />
+        {appointStatusFlows ? (
+          <AppointmentFlow statusCounts={appointStatusFlows} />
         ) : (
           <Typography>Đang tải dữ liệu luồng...</Typography>
         )}
