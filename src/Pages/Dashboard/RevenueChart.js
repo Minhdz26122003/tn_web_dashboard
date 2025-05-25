@@ -107,8 +107,16 @@ const RevenueChart = () => {
     return stringValue;
   };
 
-  const xAxisDataKey = "payment_date_formatted";
-
+  const getXAxisDataKey = () => {
+    if (groupBy === "month") {
+      return "payment_month";
+    } else if (groupBy === "year") {
+      return "payment_year";
+    } else {
+      return "payment_date_formatted"; // Mặc định là ngày
+    }
+  };
+  const currentXAxisDataKey = getXAxisDataKey();
   return (
     <Box
       sx={{
@@ -174,7 +182,10 @@ const RevenueChart = () => {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey={xAxisDataKey} tickFormatter={xAxisTickFormatter} />
+          <XAxis
+            dataKey={currentXAxisDataKey}
+            tickFormatter={xAxisTickFormatter}
+          />
           <YAxis tickFormatter={formatCurrency} />
           <Tooltip formatter={(value) => formatCurrency(value)} />
           <Legend />

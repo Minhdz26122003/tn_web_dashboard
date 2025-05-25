@@ -10,7 +10,6 @@ import ApiService from "../../services/ApiCaller";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DescriptionIcon from "@mui/icons-material/Description";
-import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PersonIcon from "@mui/icons-material/Person";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
@@ -21,8 +20,6 @@ import RevenueChart from "./RevenueChart";
 import AccessoryRevenueChart from "./AccessoryRevenueChart";
 
 const Dashboard = () => {
-  const [month, setMonth] = useState(12);
-  const [year, setYear] = useState(2024);
   const [user, setTotalUsers] = useState(0);
   const [service, setTotalServices] = useState(0);
   const [appointments, setTotalApps] = useState(0);

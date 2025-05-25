@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import ApiService from "../../services/ApiCaller";
 import AccountModel from "../../Model/Account/AcountModel";
 

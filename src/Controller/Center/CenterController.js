@@ -31,8 +31,7 @@ const CenterController = (url) => {
   const [selectedFile, setSelectedFile] = useState(null);
   // State để lưu trữ URL ảnh xem trước
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+
   useEffect(() => {
     fetchCenter(1, pagination.limit);
     if (selectedFile) {
