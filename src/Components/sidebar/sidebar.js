@@ -15,9 +15,7 @@ import RoomServiceIcon from "@mui/icons-material/RoomService";
 import PersonIcon from "@mui/icons-material/Person";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
 import PaidIcon from "@mui/icons-material/Paid";
-import CommentIcon from "@mui/icons-material/Comment";
 import { Link, useLocation } from "react-router-dom";
 import img from "../../Assets/images/logo-ct.png";
 
@@ -36,6 +34,12 @@ const Sidebar = ({ onMenuClick, isSidebarOpen, permissions }) => {
       icon: <PersonIcon />,
       link: "/account",
       permission: "account",
+    },
+    {
+      text: "Danh mục dịch vụ",
+      icon: <RoomServiceIcon />,
+      link: "/typeservice",
+      permission: "typeservice",
     },
     {
       text: "Dịch vụ",
@@ -66,12 +70,6 @@ const Sidebar = ({ onMenuClick, isSidebarOpen, permissions }) => {
       icon: <PaidIcon />,
       link: "/payment",
       permission: "payment",
-    },
-    {
-      text: "Bình luận",
-      icon: <CommentIcon />,
-      link: "/review",
-      permission: "review",
     },
   ];
 

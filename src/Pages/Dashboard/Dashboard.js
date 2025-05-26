@@ -112,7 +112,7 @@ const Dashboard = () => {
   const fetchAppointFlows = async () => {
     try {
       const response = await ApiService.get(
-        `${url}apihm/Admin/Statistical/get_appointment_status_counts.php`
+        `${url}apihm/Admin/Statistical/get_appoint_status.php`
       );
       if (response.data.success) {
         setAppointStatusFlows(response.data.data);
@@ -162,7 +162,7 @@ const Dashboard = () => {
           <CardContent className="card-content-top">
             <Box className="text-section">
               <Typography variant="h5" className="value">
-                {appointments}+
+                {appointments}
               </Typography>
               <Typography variant="body2" className="title">
                 Lịch hẹn
@@ -181,7 +181,7 @@ const Dashboard = () => {
           <CardContent className="card-content-top">
             <Box className="text-section">
               <Typography variant="h5" className="value">
-                {service}+
+                {service}
               </Typography>
               <Typography variant="body2" className="title">
                 Dịch vụ
@@ -200,7 +200,7 @@ const Dashboard = () => {
           <CardContent className="card-content-top">
             <Box className="text-section">
               <Typography variant="h5" className="value">
-                {user}+
+                {user}
               </Typography>
               <Typography variant="body2" className="title">
                 Người dùng
@@ -219,7 +219,7 @@ const Dashboard = () => {
           <CardContent className="card-content-top">
             <Box className="text-section">
               <Typography variant="h5" className="value">
-                {car}+
+                {car}
               </Typography>
               <Typography variant="body2" className="title">
                 Xe

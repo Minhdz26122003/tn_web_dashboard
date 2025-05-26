@@ -1,4 +1,3 @@
-import React from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import { Box } from "@mui/material";
 import Sidebar from "../Components/sidebar/sidebar";
@@ -11,8 +10,9 @@ import Appointment from "../Pages/Appointment/Appointment";
 import Profile from "../Pages/Profile/profile";
 import Login from "../Pages//Login/Login";
 import Payment from "../Pages/Payment/Payment";
-import Review from "../Pages/Review/Review";
 import Accessory from "../Pages/Accessory/Accessory";
+import TypeService from "../Pages/TypeService/TypeService";
+
 import Unauthorized from "../Components/unauthorized.js";
 
 const PrivateRoute = ({ element, loggedInUser }) => {
@@ -111,15 +111,7 @@ const AppRouter = ({
                 />
               }
             />
-            <Route
-              path="/review"
-              element={
-                <PrivateRoute
-                  loggedInUser={loggedInUser}
-                  element={<Review />}
-                />
-              }
-            />
+
             <Route
               path="/accessory"
               element={
@@ -135,6 +127,15 @@ const AppRouter = ({
                 <PrivateRoute
                   loggedInUser={loggedInUser}
                   element={<Profile user={user} />}
+                />
+              }
+            />
+            <Route
+              path="/typeservice"
+              element={
+                <PrivateRoute
+                  loggedInUser={loggedInUser}
+                  element={<TypeService />}
                 />
               }
             />

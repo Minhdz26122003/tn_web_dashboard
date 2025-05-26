@@ -485,7 +485,7 @@ const Centers = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Nút thêm dịch vụ */}
+      {/* Nút thêm */}
       <Box sx={{ position: "fixed", bottom: 30, right: 50 }}>
         <Fab color="primary" aria-label="add" onClick={handleAddClick}>
           <AddIcon />

@@ -158,7 +158,7 @@ const AccountController = (url) => {
         setMessage("Thêm tài khoản thành công!");
         setOpenSnackbar(true);
       } else {
-        setMessage("Lỗi: " + response.data.message);
+        setMessage("Lỗi: " + response.data.error.message);
         setOpenSnackbar(true);
       }
       setOpenAdd(false);

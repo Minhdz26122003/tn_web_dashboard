@@ -89,7 +89,7 @@ const Account = () => {
         </Box>
         <Box className="account-dropdown">
           <FormControl className="account-drop" style={{ minWidth: 100 }}>
-            <InputLabel>Vai trò</InputLabel>
+            <InputLabel>Trạng thái</InputLabel>
             <Select
               sx={{ height: "52px" }}
               size="small"
