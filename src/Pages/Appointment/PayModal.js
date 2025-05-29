@@ -27,6 +27,8 @@ export default function PayModal({ open, onClose, appointmentId }) {
     service_total: 0,
     parts_total: 0,
     total: 0,
+    deposit_amount: 0, // Thêm trường này
+    total_after: 0, // Thêm trường này
   });
   const [loading, setLoading] = useState(false);
 
@@ -125,15 +127,27 @@ export default function PayModal({ open, onClose, appointmentId }) {
               <Typography fontWeight="bold" sx={{ pb: 2 }}>
                 Phụ tùng: {fmt(data.parts_total)}
               </Typography>
+              <Typography fontWeight="bold" sx={{ pb: 2 }}>
+                Tiền cọc: {fmt(data.deposit_amount)}
+              </Typography>
               <Divider sx={{ borderBottomWidth: 2, borderColor: "#ff0000" }} />
 
+              {/* Hiển thị số tiền đặt cọc */}
+              {data.deposit_amount > 0 && ( // Chỉ hiển thị nếu có tiền cọc
+                <Typography fontWeight="bold" sx={{ pt: 2, pb: 1 }}>
+                  Tiền cọc: {fmt(data.deposit_amount)}
+                </Typography>
+              )}
+
+              {/* Hiển thị tổng tiền sau khi trừ cọc */}
               <Typography
                 variant="h6"
                 fontWeight="bold"
                 sx={{ pt: 2 }}
                 color="error"
               >
-                Tổng cộng: {fmt(data.total)}
+                Tổng cộng (sau cọc): {fmt(data.total_after)}{" "}
+                {/* Sử dụng total_after */}
               </Typography>
             </Box>
           </>

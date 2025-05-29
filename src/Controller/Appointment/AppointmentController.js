@@ -218,13 +218,13 @@ const AppointmentController = (url) => {
   const confirmAppointment = async (id) => {
     try {
       const response = await ApiService.post(
-        `${url}apihm/Admin/Appointment/confirm_appoint.php`,
+        `${url}apihm/Admin/Appointment/add_deposit.php`,
         {
           appointment_id: id,
         }
       );
       if (response.data.success) {
-        setMessage("Xác nhận lịch thành công!");
+        setMessage("Xác nhận và tạo cọc lịch thành công!");
         setOpenSnackbar(true);
         fetchAppointments();
       } else {
