@@ -27,7 +27,7 @@ const AccessoryController = (url) => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetchAccessorys();
+    fetchAccessorys(1, pagination.limit);
   }, []);
 
   const fetchAccessorys = async (
@@ -161,7 +161,7 @@ const AccessoryController = (url) => {
       }
 
       setOpenAdd(false);
-      fetchAccessorys();
+      fetchAccessorys(1, pagination.limit);
     } catch (error) {
       console.error("Lỗi khi thêm:", error);
     }
@@ -190,7 +190,7 @@ const AccessoryController = (url) => {
         setOpenSnackbar(true);
       }
       setOpenEdit(false);
-      fetchAccessorys();
+      fetchAccessorys(1, pagination.limit);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
     }

@@ -280,7 +280,7 @@ const ServiceController = (url) => {
         setOpenSnackbar(true);
       }
       setOpenEdit(false);
-      fetchServices();
+      fetchServices(1, pagination.limit);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
     }

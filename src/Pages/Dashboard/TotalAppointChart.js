@@ -102,7 +102,7 @@ const TotalAppointmentChart = () => {
       }}
     >
       <Typography variant="h6" fontWeight="bold" mb={2} sx={{ color: "#333" }}>
-        Biểu đồ số lượng lịch hẹn
+        Biểu đồ số lượng lịch hẹn trên App
       </Typography>
 
       <Box

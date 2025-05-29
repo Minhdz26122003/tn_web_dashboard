@@ -129,7 +129,7 @@ const RevenueChart = () => {
       }}
     >
       <Typography variant="h6" fontWeight="bold" mb={2} sx={{ color: "#333" }}>
-        Biểu đồ doanh thu
+        Biểu đồ doanh thu trên App
       </Typography>
 
       <Box
