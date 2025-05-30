@@ -18,7 +18,7 @@ const AppointmentController = (url) => {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    limit: 10,
+    limit: 20,
   });
   const [statusCounts, setStatusCounts] = useState({
     all: 0,
