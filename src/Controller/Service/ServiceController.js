@@ -92,10 +92,6 @@ const ServiceController = (url) => {
       if (response.data && Array.isArray(response.data.data)) {
         setTypes(response.data.data);
       } else {
-        console.error(
-          "Dữ liệu loại dịch vụ từ API không phải là mảng:",
-          response.data
-        );
         setTypes([]);
       }
     } catch (error) {
@@ -107,8 +103,9 @@ const ServiceController = (url) => {
     if (
       !serviceData.service_name ||
       !serviceData.description ||
-      !serviceData.service_img ||
-      !serviceData.price ||
+      serviceData.price === null ||
+      serviceData.price === undefined ||
+      serviceData.price === "" || // Kiểm tra thêm cho trường hợp rỗng
       !serviceData.time
     ) {
       setMessage("Vui lòng điền đầy đủ thông tin bắt buộc!");
@@ -325,18 +322,27 @@ const ServiceController = (url) => {
     resetSelectedService();
   };
   const formatPrice = (giatri) => {
-    if (!giatri) return "0";
-    const numericValue =
-      typeof giatri === "string"
-        ? parseInt(giatri.replace(/\D/g, ""), 10)
-        : giatri;
+    if (giatri === null || giatri === undefined || giatri === "") return "0"; // Xử lý trường hợp rỗng
+    // Đảm bảo rằng giatri được xử lý như một chuỗi trước khi replace, và sau đó parse
+    const numericValue = parseInt(String(giatri).replace(/\D/g, ""), 10);
+    if (isNaN(numericValue)) return "0"; // Xử lý nếu không phải số hợp lệ sau khi làm sạch
     return numericValue.toLocaleString("vi-VN");
   };
+  // const handlePriceChangeInField = (e) => {
+  //   const value = e.target.value;
+  //   setSelectedService({
+  //     ...selectedService,
+  //     price: value,
+  //   });
+  // };
   const handlePriceChangeInField = (e) => {
-    const value = e.target.value;
+    const rawValue = e.target.value;
+    // Loại bỏ tất cả các ký tự không phải là số từ giá trị nhập vào
+    const numericString = rawValue.toString().replace(/\D/g, "");
+
     setSelectedService({
       ...selectedService,
-      price: value,
+      price: numericString, // Lưu giá trị đã được làm sạch
     });
   };
 
