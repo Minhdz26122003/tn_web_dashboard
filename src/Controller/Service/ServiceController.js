@@ -17,7 +17,7 @@ const ServiceController = (url) => {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    limit: 5,
+    limit: 10,
   });
   const [openEdit, setOpenEdit] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);

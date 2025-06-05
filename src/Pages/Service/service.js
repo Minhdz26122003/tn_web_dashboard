@@ -538,7 +538,7 @@ const Service = () => {
       </Dialog>
 
       {/* Nút thêm dịch vụ */}
-      <Box sx={{ position: "fixed", bottom: 30, right: 50 }}>
+      <Box sx={{ position: "fixed", bottom: 60, right: 50 }}>
         <Fab color="primary" aria-label="add" onClick={handleAddClick}>
           <AddIcon />
         </Fab>
